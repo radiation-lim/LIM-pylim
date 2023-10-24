@@ -1,0 +1,43 @@
+# pyproject.toml
+
+[project]
+name = "pylim"
+version = "1.0.0"
+description = "Useful functions, tools and metadata used at the Leipzig Institute for Meteorology"
+readme = "README.md"
+authors = [{ name = "Johannes Röttenbacher", email = "johannes.roettenbacher@uni-leipzig.de" },
+    { name = "Hanno Müller" },
+    { name = "André Ehrlich" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+keywords = ["meteorology", "Leipzig", "tools"]
+dependencies = [
+    "pandas",
+    "numpy",
+    "toml",
+    "matplotlib",
+    "scipy",
+    "xarray",
+    "tqdm",
+    "joblib",
+    "pysolar",
+    "geopy",
+    "cmasher",
+    "importlib_resources",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+
+[project.urls]
+GitHub = "https://github.com/jroettenbacher/pylim"
+Documentation = ""
+
+[tool.setuptools.packages.find]
+where = ["src"]

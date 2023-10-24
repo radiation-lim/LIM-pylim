@@ -1,0 +1,79 @@
+Metadata-Version: 2.1
+Name: pylim
+Version: 1.0.0
+Summary: Useful functions, tools and metadata used at the Leipzig Institute for Meteorology
+Author-email: Johannes Röttenbacher <johannes.roettenbacher@uni-leipzig.de>
+License: MIT License
+        
+        Copyright (c) 2022 - Johannes Röttenbacher
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://github.com/jroettenbacher/pylim
+Keywords: meteorology,Leipzig,tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: toml
+Requires-Dist: matplotlib
+Requires-Dist: scipy
+Requires-Dist: xarray
+Requires-Dist: tqdm
+Requires-Dist: joblib
+Requires-Dist: pysolar
+Requires-Dist: geopy
+Requires-Dist: cmasher
+Provides-Extra: dev
+Requires-Dist: black; extra == "dev"
+Requires-Dist: bumpver; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: pip-tools; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+
+# PhD Base Project
+
+*author: Johannes Röttenbacher*
+
+Here I code all the stuff I need for my PhD on Arctic cirrus. 
+It includes processing for measurement data gathered by the HALO aircraft.
+During the first year a new python package was created which provides useful functions used in the processing and analysis of the data.
+The package is called `pylim` and can be found in `src`.
+Further there are folders for different purposes:
+
+* `analysis`: case studies or general campaign analysis to answer scientific questions
+* `processing`: scripts to generate error/bias corrected, calibrated and shareable/publishable files from raw files
+* `quicklooks`: quicklooks of measurements (raw and calibrated) and of calibrations
+
+The data is sorted by flight.
+The exact paths are defined in `config.toml` and can be adjusted according to your setup.
+More information on how to adjust this file can be found in [Setup](./docs/setup.rst).
+
+Documentation can be found [here](https://jroettenbacher.github.io/phd_base/).
+
+
+## FAQ
+
+* What do negative measurements in the SMART dark current mean?
+
+Answer: The conversion of the analog signal to a digital can lead to this.
