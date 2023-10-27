@@ -3,6 +3,8 @@
 
 A python package bundling processing functions and tools for the atmospheric radiation working group at the Leipzig Institute for Meteorology, Germany.
 
+Documentation: https://radiation-lim.github.io/LIM-pylim/
+
 # Installation instructions:
 
 ## Installing and using pylim from GitHub
