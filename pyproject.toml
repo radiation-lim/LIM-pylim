@@ -36,8 +36,7 @@ requires-python = ">=3.8"
 dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
 
 [project.urls]
-GitHub = "https://github.com/jroettenbacher/pylim"
-Documentation = ""
+GitHub = "https://github.com/radiation-lim/LIM-pylim"
 
 [tool.setuptools.packages.find]
 where = ["src"]
