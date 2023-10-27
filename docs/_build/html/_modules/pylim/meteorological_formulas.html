@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pylim.meteorological_formulas &mdash; pylim 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pylim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.meteorological_formulas</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pylim.meteorological_formulas</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;General meteorological formulas</span>
+
+<span class="sd">*author*: Johannes Röttenbacher</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+
+<div class="viewcode-block" id="relative_humidity_water_to_relative_humidity_ice">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice">[docs]</a>
+<span class="k">def</span> <span class="nf">relative_humidity_water_to_relative_humidity_ice</span><span class="p">(</span>
+    <span class="n">relative_humidity_water</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+    <span class="n">temperature</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;huang&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the relative humidity over water to relative humidity over ice using either the formulas by</span>
+<span class="sd">    :cite:t:`huang2018` or by :cite:t:`alduchov1996`.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        RH_{ice} = \\frac{RH_{water} * e_{s,w}}{e_{s,i}}</span>
+
+<span class="sd">    with :math:`e_{s,w}` the saturation vapor pressure of water and :math:`e_{s,i}` the saturation vapor pressure of ice:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        e_{s,w} = \\frac{\\exp\\left(34.494 - \\frac{4924.99}{t + 237.1}\\right)}{(t + 105)^{1.157}} (t &gt; 0°C)</span>
+
+<span class="sd">        e_{s,i} = \\frac{\\exp\\left(43.494 - \\frac{6545.8}{t + 278}\\right)}{(t + 868)^{2}} (t \\le 0°C)</span>
+
+<span class="sd">    with :math:`t` being the temperature in °C. When version is ``alduchov`` the following equations are used:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        e_{s,w} = 6.1094 * \\exp\\left(\\frac{17.625 * t}{243.04 + t}\\right)</span>
+
+<span class="sd">        e_{s,i} = 6.1121 * \\exp\\left(\\frac{22.587 * t}{273.86 + t}\\right)</span>
+
+<span class="sd">    with :math:`t` the temperature in °C.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        relative_humidity_water: ambient relative humidity in percent</span>
+<span class="sd">        temperature: ambient temperature in °C</span>
+<span class="sd">        version: which formulas to use for calculating the saturation vapor pressure of water and ice (&#39;huang&#39; or &#39;alduchov&#39;)</span>
+
+<span class="sd">    Returns: relative humidity over ice</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;alduchov&quot;</span><span class="p">:</span>
+        <span class="n">saturation_vapour_pressure_water</span> <span class="o">=</span> <span class="mf">6.1094</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+            <span class="mf">17.625</span> <span class="o">*</span> <span class="n">temperature</span> <span class="o">/</span> <span class="p">(</span><span class="mf">243.04</span> <span class="o">+</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">saturation_vapour_pressure_ice</span> <span class="o">=</span> <span class="mf">6.1121</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+            <span class="mf">22.587</span> <span class="o">*</span> <span class="n">temperature</span> <span class="o">/</span> <span class="p">(</span><span class="mf">273.86</span> <span class="o">+</span> <span class="n">temperature</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">saturation_vapour_pressure_water</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">34.494</span> <span class="o">-</span> <span class="p">(</span><span class="mf">4924.99</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="o">+</span> <span class="mf">237.1</span><span class="p">)))</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="o">+</span> <span class="mi">105</span><span class="p">)</span> <span class="o">**</span> <span class="mf">1.57</span>
+        <span class="p">)</span>
+        <span class="n">saturation_vapour_pressure_ice</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">43.494</span> <span class="o">-</span> <span class="p">(</span><span class="mf">6545.8</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="o">+</span> <span class="mi">278</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="n">temperature</span> <span class="o">+</span> <span class="mi">868</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+    <span class="n">relative_humidity_ice</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">relative_humidity_water</span>
+        <span class="o">*</span> <span class="n">saturation_vapour_pressure_water</span>
+        <span class="o">/</span> <span class="n">saturation_vapour_pressure_ice</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">relative_humidity_ice</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">barometric_height_old</span><span class="p">(</span><span class="n">p_high</span><span class="p">,</span> <span class="n">p_low</span><span class="p">,</span> <span class="n">T_high</span><span class="p">):</span>
+    <span class="n">g_geo</span> <span class="o">=</span> <span class="mf">9.81</span>  <span class="c1"># earth acceleration in m/s^2</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="mf">8.314</span>  <span class="c1"># universelle Gaskonstante</span>
+    <span class="n">molar_mass_air</span> <span class="o">=</span> <span class="mf">0.02896</span>  <span class="c1"># kg/mol</span>
+    <span class="n">delta_h</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_high</span> <span class="o">/</span> <span class="n">p_low</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T_high</span> <span class="o">/</span> <span class="p">(</span><span class="n">molar_mass_air</span> <span class="o">*</span> <span class="n">g_geo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">delta_h</span>
+
+
+<div class="viewcode-block" id="barometric_height">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.barometric_height">[docs]</a>
+<span class="k">def</span> <span class="nf">barometric_height</span><span class="p">(</span>
+    <span class="n">pressure_profile</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">temperature_profile</span><span class="p">:</span> <span class="n">ArrayLike</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the barometric height from a pressure and temperature profile.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\Delta h = \\frac{\\log\\left(\\frac{p(h_1)}{p(h_0)}\\right) * R * T(h_1)}{M * g}</span>
+
+<span class="sd">    with :math:`h` the height in meter, :math:`R` the universal gas constant, :math:`T` the temperature in Kelvin,</span>
+<span class="sd">    :math:`M` the molar mass of air and :math:`g` earth&#39;s acceleration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pressure_profile: pressure profile (Pa)</span>
+<span class="sd">        temperature_profile: temperature profile (K)</span>
+
+<span class="sd">    Returns: barometric height (m)</span>
+
+<span class="sd">    @author: Hanno Müller, Johannes Röttenbacher</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pressure_profile</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+        <span class="n">temperature_profile</span>
+    <span class="p">),</span> <span class="s2">&quot;Pressure and Temperature profile have to be of same length!&quot;</span>
+    <span class="n">g_geo</span> <span class="o">=</span> <span class="mf">9.81</span>  <span class="c1"># earth acceleration in m/s^2</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="mf">8.314</span>  <span class="c1"># universal gas constant</span>
+    <span class="n">molar_mass_air</span> <span class="o">=</span> <span class="mf">0.02896</span>  <span class="c1"># kg/mol</span>
+    <span class="c1"># check if pressure profile is ascending (surface at index 0)</span>
+    <span class="k">if</span> <span class="n">pressure_profile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">pressure_profile</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pressure_profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">pressure_profile</span><span class="p">)</span>
+
+    <span class="c1"># check if temperature profile is ascending (surface at index 0)</span>
+    <span class="k">if</span> <span class="n">temperature_profile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">temperature_profile</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temperature_profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">temperature_profile</span><span class="p">)</span>
+
+    <span class="n">levels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pressure_profile</span><span class="p">)</span>
+    <span class="n">barometric_height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+    <span class="n">p_low</span> <span class="o">=</span> <span class="n">pressure_profile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># set p_low to surface pressure for first iteration</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">levels</span><span class="p">):</span>
+        <span class="n">p_high</span> <span class="o">=</span> <span class="n">pressure_profile</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">t_high</span> <span class="o">=</span> <span class="n">temperature_profile</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">delta_h</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_high</span> <span class="o">/</span> <span class="n">p_low</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span> <span class="o">*</span> <span class="n">t_high</span> <span class="o">/</span> <span class="p">(</span><span class="n">molar_mass_air</span> <span class="o">*</span> <span class="n">g_geo</span><span class="p">)</span>
+        <span class="n">barometric_height</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">barometric_height</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_h</span>
+        <span class="n">p_low</span> <span class="o">=</span> <span class="n">pressure_profile</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+    <span class="c1"># replace top of atmosphere value (inf) with nan</span>
+    <span class="n">barometric_height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">barometric_height</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">barometric_height</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">barometric_height</span></div>
+
+
+
+<div class="viewcode-block" id="barometric_height_simple">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.barometric_height_simple">[docs]</a>
+<span class="k">def</span> <span class="nf">barometric_height_simple</span><span class="p">(</span><span class="n">pressure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the barometric height assuming a constant temperature of 0°C</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pressure: pressure profile (Pa)</span>
+
+<span class="sd">    Returns: barometric_height</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">q_air</span> <span class="o">=</span> <span class="mf">1.292</span>  <span class="c1"># dry air density at 0°C in kg/m3</span>
+    <span class="n">g_geo</span> <span class="o">=</span> <span class="mf">9.81</span>  <span class="c1"># earth acceleration in m/s^2</span>
+    <span class="c1"># check if array is ascending from surface to top of atmosphere</span>
+    <span class="k">if</span> <span class="n">pressure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">pressure</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">surface_pressure</span> <span class="o">=</span> <span class="n">pressure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pressure</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">pressure</span><span class="p">)</span>
+        <span class="n">surface_pressure</span> <span class="o">=</span> <span class="n">pressure</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">barometric_height</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">surface_pressure</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pressure</span> <span class="o">/</span> <span class="n">surface_pressure</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">q_air</span> <span class="o">*</span> <span class="n">g_geo</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c1"># replace TOA height (calculated as infinity) with nan</span>
+    <span class="n">barometric_height</span><span class="p">[</span><span class="n">barometric_height</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">barometric_height</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">pressure_half</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="mf">0.00000000e00</span><span class="p">,</span>
+            <span class="mf">2.00036502e00</span><span class="p">,</span>
+            <span class="mf">3.10224104e00</span><span class="p">,</span>
+            <span class="mf">4.66608381e00</span><span class="p">,</span>
+            <span class="mf">6.82797718e00</span><span class="p">,</span>
+            <span class="mf">9.74696636e00</span><span class="p">,</span>
+            <span class="mf">1.36054239e01</span><span class="p">,</span>
+            <span class="mf">1.86089306e01</span><span class="p">,</span>
+            <span class="mf">2.49857178e01</span><span class="p">,</span>
+            <span class="mf">3.29857101e01</span><span class="p">,</span>
+            <span class="mf">4.28792419e01</span><span class="p">,</span>
+            <span class="mf">5.49554634e01</span><span class="p">,</span>
+            <span class="mf">6.95205765e01</span><span class="p">,</span>
+            <span class="mf">8.68958817e01</span><span class="p">,</span>
+            <span class="mf">1.07415741e02</span><span class="p">,</span>
+            <span class="mf">1.31425507e02</span><span class="p">,</span>
+            <span class="mf">1.59279404e02</span><span class="p">,</span>
+            <span class="mf">1.91338562e02</span><span class="p">,</span>
+            <span class="mf">2.27968948e02</span><span class="p">,</span>
+            <span class="mf">2.69539581e02</span><span class="p">,</span>
+            <span class="mf">3.16420746e02</span><span class="p">,</span>
+            <span class="mf">3.68982361e02</span><span class="p">,</span>
+            <span class="mf">4.27592499e02</span><span class="p">,</span>
+            <span class="mf">4.92616028e02</span><span class="p">,</span>
+            <span class="mf">5.64413452e02</span><span class="p">,</span>
+            <span class="mf">6.43339905e02</span><span class="p">,</span>
+            <span class="mf">7.29744141e02</span><span class="p">,</span>
+            <span class="mf">8.23967834e02</span><span class="p">,</span>
+            <span class="mf">9.26344910e02</span><span class="p">,</span>
+            <span class="mf">1.03720117e03</span><span class="p">,</span>
+            <span class="mf">1.15685364e03</span><span class="p">,</span>
+            <span class="mf">1.28561035e03</span><span class="p">,</span>
+            <span class="mf">1.42377014e03</span><span class="p">,</span>
+            <span class="mf">1.57162292e03</span><span class="p">,</span>
+            <span class="mf">1.72944897e03</span><span class="p">,</span>
+            <span class="mf">1.89751929e03</span><span class="p">,</span>
+            <span class="mf">2.07609595e03</span><span class="p">,</span>
+            <span class="mf">2.26543164e03</span><span class="p">,</span>
+            <span class="mf">2.46577051e03</span><span class="p">,</span>
+            <span class="mf">2.67734814e03</span><span class="p">,</span>
+            <span class="mf">2.90039136e03</span><span class="p">,</span>
+            <span class="mf">3.13511938e03</span><span class="p">,</span>
+            <span class="mf">3.38174365e03</span><span class="p">,</span>
+            <span class="mf">3.64046826e03</span><span class="p">,</span>
+            <span class="mf">3.91149048e03</span><span class="p">,</span>
+            <span class="mf">4.19493066e03</span><span class="p">,</span>
+            <span class="mf">4.49081738e03</span><span class="p">,</span>
+            <span class="mf">4.79914941e03</span><span class="p">,</span>
+            <span class="mf">5.11989502e03</span><span class="p">,</span>
+            <span class="mf">5.45299072e03</span><span class="p">,</span>
+            <span class="mf">5.79834473e03</span><span class="p">,</span>
+            <span class="mf">6.15607422e03</span><span class="p">,</span>
+            <span class="mf">6.52694678e03</span><span class="p">,</span>
+            <span class="mf">6.91187061e03</span><span class="p">,</span>
+            <span class="mf">7.31187304e03</span><span class="p">,</span>
+            <span class="mf">7.72810139e03</span><span class="p">,</span>
+            <span class="mf">8.16183637e03</span><span class="p">,</span>
+            <span class="mf">8.61453271e03</span><span class="p">,</span>
+            <span class="mf">9.08781047e03</span><span class="p">,</span>
+            <span class="mf">9.58292831e03</span><span class="p">,</span>
+            <span class="mf">1.01006815e04</span><span class="p">,</span>
+            <span class="mf">1.06418845e04</span><span class="p">,</span>
+            <span class="mf">1.12073701e04</span><span class="p">,</span>
+            <span class="mf">1.17979909e04</span><span class="p">,</span>
+            <span class="mf">1.24146231e04</span><span class="p">,</span>
+            <span class="mf">1.30581674e04</span><span class="p">,</span>
+            <span class="mf">1.37295223e04</span><span class="p">,</span>
+            <span class="mf">1.44296190e04</span><span class="p">,</span>
+            <span class="mf">1.51594137e04</span><span class="p">,</span>
+            <span class="mf">1.59198552e04</span><span class="p">,</span>
+            <span class="mf">1.67119243e04</span><span class="p">,</span>
+            <span class="mf">1.75366231e04</span><span class="p">,</span>
+            <span class="mf">1.83949558e04</span><span class="p">,</span>
+            <span class="mf">1.92879478e04</span><span class="p">,</span>
+            <span class="mf">2.02166434e04</span><span class="p">,</span>
+            <span class="mf">2.11820925e04</span><span class="p">,</span>
+            <span class="mf">2.21853650e04</span><span class="p">,</span>
+            <span class="mf">2.32275472e04</span><span class="p">,</span>
+            <span class="mf">2.43097385e04</span><span class="p">,</span>
+            <span class="mf">2.54330433e04</span><span class="p">,</span>
+            <span class="mf">2.65985942e04</span><span class="p">,</span>
+            <span class="mf">2.78075270e04</span><span class="p">,</span>
+            <span class="mf">2.90609874e04</span><span class="p">,</span>
+            <span class="mf">3.03601470e04</span><span class="p">,</span>
+            <span class="mf">3.17061728e04</span><span class="p">,</span>
+            <span class="mf">3.31002532e04</span><span class="p">,</span>
+            <span class="mf">3.45435863e04</span><span class="p">,</span>
+            <span class="mf">3.60373793e04</span><span class="p">,</span>
+            <span class="mf">3.75828546e04</span><span class="p">,</span>
+            <span class="mf">3.91812344e04</span><span class="p">,</span>
+            <span class="mf">4.08337637e04</span><span class="p">,</span>
+            <span class="mf">4.25416791e04</span><span class="p">,</span>
+            <span class="mf">4.43062400e04</span><span class="p">,</span>
+            <span class="mf">4.61287056e04</span><span class="p">,</span>
+            <span class="mf">4.80103531e04</span><span class="p">,</span>
+            <span class="mf">4.99524554e04</span><span class="p">,</span>
+            <span class="mf">5.19512909e04</span><span class="p">,</span>
+            <span class="mf">5.39971732e04</span><span class="p">,</span>
+            <span class="mf">5.60759427e04</span><span class="p">,</span>
+            <span class="mf">5.81777296e04</span><span class="p">,</span>
+            <span class="mf">6.02922922e04</span><span class="p">,</span>
+            <span class="mf">6.24092042e04</span><span class="p">,</span>
+            <span class="mf">6.45180831e04</span><span class="p">,</span>
+            <span class="mf">6.66087664e04</span><span class="p">,</span>
+            <span class="mf">6.86715311e04</span><span class="p">,</span>
+            <span class="mf">7.06972280e04</span><span class="p">,</span>
+            <span class="mf">7.26774463e04</span><span class="p">,</span>
+            <span class="mf">7.46046457e04</span><span class="p">,</span>
+            <span class="mf">7.64722106e04</span><span class="p">,</span>
+            <span class="mf">7.82745138e04</span><span class="p">,</span>
+            <span class="mf">8.00069724e04</span><span class="p">,</span>
+            <span class="mf">8.16659859e04</span><span class="p">,</span>
+            <span class="mf">8.32489411e04</span><span class="p">,</span>
+            <span class="mf">8.47541778e04</span><span class="p">,</span>
+            <span class="mf">8.61808668e04</span><span class="p">,</span>
+            <span class="mf">8.75289750e04</span><span class="p">,</span>
+            <span class="mf">8.87991768e04</span><span class="p">,</span>
+            <span class="mf">8.99927474e04</span><span class="p">,</span>
+            <span class="mf">9.11114692e04</span><span class="p">,</span>
+            <span class="mf">9.21575697e04</span><span class="p">,</span>
+            <span class="mf">9.31336048e04</span><span class="p">,</span>
+            <span class="mf">9.40424091e04</span><span class="p">,</span>
+            <span class="mf">9.48869959e04</span><span class="p">,</span>
+            <span class="mf">9.56705218e04</span><span class="p">,</span>
+            <span class="mf">9.63962206e04</span><span class="p">,</span>
+            <span class="mf">9.70673438e04</span><span class="p">,</span>
+            <span class="mf">9.76871191e04</span><span class="p">,</span>
+            <span class="mf">9.82587361e04</span><span class="p">,</span>
+            <span class="mf">9.87853159e04</span><span class="p">,</span>
+            <span class="mf">9.92698744e04</span><span class="p">,</span>
+            <span class="mf">9.97153078e04</span><span class="p">,</span>
+            <span class="mf">1.00124391e05</span><span class="p">,</span>
+            <span class="mf">1.00499770e05</span><span class="p">,</span>
+            <span class="mf">1.00843945e05</span><span class="p">,</span>
+            <span class="mf">1.01159256e05</span><span class="p">,</span>
+            <span class="mf">1.01447925e05</span><span class="p">,</span>
+            <span class="mf">1.01712062e05</span><span class="p">,</span>
+            <span class="mf">1.01953680e05</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">temperature_half</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="mf">196.17694092</span><span class="p">,</span>
+            <span class="mf">201.40683631</span><span class="p">,</span>
+            <span class="mf">205.77407659</span><span class="p">,</span>
+            <span class="mf">209.69290417</span><span class="p">,</span>
+            <span class="mf">215.18804762</span><span class="p">,</span>
+            <span class="mf">224.70515674</span><span class="p">,</span>
+            <span class="mf">239.62107908</span><span class="p">,</span>
+            <span class="mf">253.48715003</span><span class="p">,</span>
+            <span class="mf">260.76468316</span><span class="p">,</span>
+            <span class="mf">266.56703579</span><span class="p">,</span>
+            <span class="mf">272.19733915</span><span class="p">,</span>
+            <span class="mf">275.99084954</span><span class="p">,</span>
+            <span class="mf">278.18932111</span><span class="p">,</span>
+            <span class="mf">279.59909037</span><span class="p">,</span>
+            <span class="mf">281.13585504</span><span class="p">,</span>
+            <span class="mf">279.84737073</span><span class="p">,</span>
+            <span class="mf">274.79752344</span><span class="p">,</span>
+            <span class="mf">270.90699415</span><span class="p">,</span>
+            <span class="mf">268.58975561</span><span class="p">,</span>
+            <span class="mf">265.54942241</span><span class="p">,</span>
+            <span class="mf">261.85652346</span><span class="p">,</span>
+            <span class="mf">258.25080959</span><span class="p">,</span>
+            <span class="mf">253.84112023</span><span class="p">,</span>
+            <span class="mf">248.21520521</span><span class="p">,</span>
+            <span class="mf">244.26001714</span><span class="p">,</span>
+            <span class="mf">242.39257771</span><span class="p">,</span>
+            <span class="mf">240.87704963</span><span class="p">,</span>
+            <span class="mf">238.95997646</span><span class="p">,</span>
+            <span class="mf">237.00596294</span><span class="p">,</span>
+            <span class="mf">235.49064744</span><span class="p">,</span>
+            <span class="mf">234.7742646</span><span class="p">,</span>
+            <span class="mf">234.37706688</span><span class="p">,</span>
+            <span class="mf">233.02942684</span><span class="p">,</span>
+            <span class="mf">231.102146</span><span class="p">,</span>
+            <span class="mf">229.93968816</span><span class="p">,</span>
+            <span class="mf">229.42357187</span><span class="p">,</span>
+            <span class="mf">228.98211629</span><span class="p">,</span>
+            <span class="mf">228.58466477</span><span class="p">,</span>
+            <span class="mf">228.02236696</span><span class="p">,</span>
+            <span class="mf">227.58871118</span><span class="p">,</span>
+            <span class="mf">227.52062781</span><span class="p">,</span>
+            <span class="mf">227.41269591</span><span class="p">,</span>
+            <span class="mf">227.36565461</span><span class="p">,</span>
+            <span class="mf">227.55814335</span><span class="p">,</span>
+            <span class="mf">227.83813869</span><span class="p">,</span>
+            <span class="mf">228.01022473</span><span class="p">,</span>
+            <span class="mf">228.16288009</span><span class="p">,</span>
+            <span class="mf">228.50897199</span><span class="p">,</span>
+            <span class="mf">228.78288898</span><span class="p">,</span>
+            <span class="mf">228.65908774</span><span class="p">,</span>
+            <span class="mf">228.2926687</span><span class="p">,</span>
+            <span class="mf">228.13172126</span><span class="p">,</span>
+            <span class="mf">228.40948917</span><span class="p">,</span>
+            <span class="mf">228.90150978</span><span class="p">,</span>
+            <span class="mf">229.17019413</span><span class="p">,</span>
+            <span class="mf">229.04995671</span><span class="p">,</span>
+            <span class="mf">228.77499157</span><span class="p">,</span>
+            <span class="mf">228.65572399</span><span class="p">,</span>
+            <span class="mf">228.81564267</span><span class="p">,</span>
+            <span class="mf">229.1123165</span><span class="p">,</span>
+            <span class="mf">229.39787394</span><span class="p">,</span>
+            <span class="mf">229.60247572</span><span class="p">,</span>
+            <span class="mf">229.6953589</span><span class="p">,</span>
+            <span class="mf">229.71883424</span><span class="p">,</span>
+            <span class="mf">229.77129607</span><span class="p">,</span>
+            <span class="mf">229.91671325</span><span class="p">,</span>
+            <span class="mf">230.09982177</span><span class="p">,</span>
+            <span class="mf">230.28120973</span><span class="p">,</span>
+            <span class="mf">230.51645064</span><span class="p">,</span>
+            <span class="mf">230.81505553</span><span class="p">,</span>
+            <span class="mf">231.11827729</span><span class="p">,</span>
+            <span class="mf">231.39082662</span><span class="p">,</span>
+            <span class="mf">231.65619322</span><span class="p">,</span>
+            <span class="mf">231.82700061</span><span class="p">,</span>
+            <span class="mf">231.85056775</span><span class="p">,</span>
+            <span class="mf">231.80312025</span><span class="p">,</span>
+            <span class="mf">231.62201592</span><span class="p">,</span>
+            <span class="mf">231.32407089</span><span class="p">,</span>
+            <span class="mf">230.87611508</span><span class="p">,</span>
+            <span class="mf">229.87908428</span><span class="p">,</span>
+            <span class="mf">228.31838619</span><span class="p">,</span>
+            <span class="mf">226.68121558</span><span class="p">,</span>
+            <span class="mf">225.17473224</span><span class="p">,</span>
+            <span class="mf">223.93250971</span><span class="p">,</span>
+            <span class="mf">223.06728503</span><span class="p">,</span>
+            <span class="mf">222.57664404</span><span class="p">,</span>
+            <span class="mf">222.69944018</span><span class="p">,</span>
+            <span class="mf">223.55664063</span><span class="p">,</span>
+            <span class="mf">224.88072837</span><span class="p">,</span>
+            <span class="mf">226.40566633</span><span class="p">,</span>
+            <span class="mf">228.06836655</span><span class="p">,</span>
+            <span class="mf">229.88666956</span><span class="p">,</span>
+            <span class="mf">231.8267085</span><span class="p">,</span>
+            <span class="mf">233.86827167</span><span class="p">,</span>
+            <span class="mf">235.94517621</span><span class="p">,</span>
+            <span class="mf">237.93157341</span><span class="p">,</span>
+            <span class="mf">239.82533873</span><span class="p">,</span>
+            <span class="mf">241.66794826</span><span class="p">,</span>
+            <span class="mf">243.40350236</span><span class="p">,</span>
+            <span class="mf">244.96791598</span><span class="p">,</span>
+            <span class="mf">246.38663828</span><span class="p">,</span>
+            <span class="mf">247.73728547</span><span class="p">,</span>
+            <span class="mf">249.07883826</span><span class="p">,</span>
+            <span class="mf">250.40834186</span><span class="p">,</span>
+            <span class="mf">251.69327222</span><span class="p">,</span>
+            <span class="mf">252.92193625</span><span class="p">,</span>
+            <span class="mf">254.07749592</span><span class="p">,</span>
+            <span class="mf">255.14140998</span><span class="p">,</span>
+            <span class="mf">256.10996523</span><span class="p">,</span>
+            <span class="mf">256.96492583</span><span class="p">,</span>
+            <span class="mf">257.67200387</span><span class="p">,</span>
+            <span class="mf">258.17842959</span><span class="p">,</span>
+            <span class="mf">258.49984674</span><span class="p">,</span>
+            <span class="mf">258.70327237</span><span class="p">,</span>
+            <span class="mf">258.8506826</span><span class="p">,</span>
+            <span class="mf">259.02602872</span><span class="p">,</span>
+            <span class="mf">259.28609687</span><span class="p">,</span>
+            <span class="mf">259.58250006</span><span class="p">,</span>
+            <span class="mf">260.08193421</span><span class="p">,</span>
+            <span class="mf">260.77866427</span><span class="p">,</span>
+            <span class="mf">261.52518146</span><span class="p">,</span>
+            <span class="mf">262.28001606</span><span class="p">,</span>
+            <span class="mf">262.92771229</span><span class="p">,</span>
+            <span class="mf">263.48446416</span><span class="p">,</span>
+            <span class="mf">264.00193651</span><span class="p">,</span>
+            <span class="mf">264.48909901</span><span class="p">,</span>
+            <span class="mf">264.94803007</span><span class="p">,</span>
+            <span class="mf">265.37910789</span><span class="p">,</span>
+            <span class="mf">265.77652654</span><span class="p">,</span>
+            <span class="mf">266.14457721</span><span class="p">,</span>
+            <span class="mf">266.48686509</span><span class="p">,</span>
+            <span class="mf">266.80185783</span><span class="p">,</span>
+            <span class="mf">267.09266898</span><span class="p">,</span>
+            <span class="mf">267.36279344</span><span class="p">,</span>
+            <span class="mf">267.61413022</span><span class="p">,</span>
+            <span class="mf">267.85496194</span><span class="p">,</span>
+            <span class="mf">268.11645932</span><span class="p">,</span>
+            <span class="mf">273.37158203</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">nhalf_levels</span> <span class="o">=</span> <span class="mi">138</span>
+    <span class="n">press_height_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nhalf_levels</span><span class="p">)</span>  <span class="c1"># aufsteigend</span>
+
+    <span class="n">p_atmos_half_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">pressure_half</span><span class="p">)</span>  <span class="c1"># aufsteigend</span>
+    <span class="n">t_atmos_half_flip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">temperature_half</span><span class="p">)</span>  <span class="c1"># aufsteigend</span>
+
+    <span class="n">press_height_flip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="c1"># calculate complex altitude profile</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">press_height_flip</span><span class="p">)):</span>
+        <span class="n">delta_h</span> <span class="o">=</span> <span class="n">barometric_height_old</span><span class="p">(</span>
+            <span class="n">p_atmos_half_flip</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">p_atmos_half_flip</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">t_atmos_half_flip</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">press_height_flip</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta_h</span> <span class="o">+</span> <span class="n">press_height_flip</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">press_height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">press_height_flip</span><span class="p">)</span>  <span class="c1"># absteigend</span>
+    <span class="c1"># calculate simple altitude profile</span>
+    <span class="n">press_height_simple</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">barometric_height_simple</span><span class="p">(</span><span class="n">p_atmos_half_flip</span><span class="p">))</span>
+    <span class="c1"># JR function</span>
+    <span class="n">press_height_jr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">barometric_height</span><span class="p">(</span><span class="n">p_atmos_half_flip</span><span class="p">,</span> <span class="n">t_atmos_half_flip</span><span class="p">))</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">press_height</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;complex&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">press_height_simple</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;simple&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">press_height_jr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;JR version&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">press_height</span> <span class="o">-</span> <span class="n">press_height_simple</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-, Radiation Group LIM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

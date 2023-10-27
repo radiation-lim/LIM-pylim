@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pylim.helpers &mdash; pylim 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pylim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pylim.helpers</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;General helper functions and general information</span>
+
+<span class="sd">*author*: Johannes Röttenbacher</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
+
+<span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">toml</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">cm</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">2.54</span>
+
+<span class="c1"># ecRad bands in nanometers</span>
+<span class="n">ecRad_bands</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Band1</span><span class="o">=</span><span class="p">(</span><span class="mi">3077</span><span class="p">,</span> <span class="mi">3846</span><span class="p">),</span> <span class="n">Band2</span><span class="o">=</span><span class="p">(</span><span class="mi">2500</span><span class="p">,</span> <span class="mi">3076</span><span class="p">),</span> <span class="n">Band3</span><span class="o">=</span><span class="p">(</span><span class="mi">2150</span><span class="p">,</span> <span class="mi">2500</span><span class="p">),</span> <span class="n">Band4</span><span class="o">=</span><span class="p">(</span><span class="mi">1942</span><span class="p">,</span> <span class="mi">2150</span><span class="p">),</span> <span class="n">Band5</span><span class="o">=</span><span class="p">(</span><span class="mi">1626</span><span class="p">,</span> <span class="mi">1941</span><span class="p">),</span>
+                   <span class="n">Band6</span><span class="o">=</span><span class="p">(</span><span class="mi">1299</span><span class="p">,</span> <span class="mi">1625</span><span class="p">),</span> <span class="n">Band7</span><span class="o">=</span><span class="p">(</span><span class="mi">1242</span><span class="p">,</span> <span class="mi">1298</span><span class="p">),</span> <span class="n">Band8</span><span class="o">=</span><span class="p">(</span><span class="mi">778</span><span class="p">,</span> <span class="mi">1241</span><span class="p">),</span> <span class="n">Band9</span><span class="o">=</span><span class="p">(</span><span class="mi">625</span><span class="p">,</span> <span class="mi">777</span><span class="p">),</span> <span class="n">Band10</span><span class="o">=</span><span class="p">(</span><span class="mi">442</span><span class="p">,</span> <span class="mi">624</span><span class="p">),</span>
+                   <span class="n">Band11</span><span class="o">=</span><span class="p">(</span><span class="mi">345</span><span class="p">,</span> <span class="mi">442</span><span class="p">),</span> <span class="n">Band12</span><span class="o">=</span><span class="p">(</span><span class="mi">263</span><span class="p">,</span> <span class="mi">344</span><span class="p">),</span> <span class="n">Band13</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">262</span><span class="p">),</span> <span class="n">Band14</span><span class="o">=</span><span class="p">(</span><span class="mi">3846</span><span class="p">,</span> <span class="mi">12195</span><span class="p">))</span>
+
+<span class="c1"># sea ice albedo bands micron</span>
+<span class="n">ci_bands</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.185</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.44</span><span class="p">,</span> <span class="mf">0.69</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.69</span><span class="p">,</span> <span class="mf">1.19</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.19</span><span class="p">,</span> <span class="mf">2.38</span><span class="p">),</span> <span class="p">(</span><span class="mf">2.38</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">)]</span>
+<span class="c1"># sea ice albedo in 6-spectral intervals for each month</span>
+<span class="n">ci_albedo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="c1"># Sea ice surf. albedo for 0.185-0.25 micron (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.876</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">)</span>
+<span class="c1"># Sea ice surf. albedo for 0.25-0.44 micron (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.876</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">)</span>
+<span class="c1"># Sea ice surf. albedo for 0.44-0.69 micron (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.876</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span> <span class="mf">0.778</span><span class="p">,</span>
+                   <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">)</span>
+<span class="c1"># Sea ice surf. albedo for 0.69-1.19 micron (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">,</span>
+                   <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.638</span><span class="p">,</span> <span class="mf">0.443</span><span class="p">,</span> <span class="mf">0.443</span><span class="p">,</span>
+                   <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">,</span> <span class="mf">0.832</span><span class="p">)</span>
+<span class="c1"># Sea ice surf. albedo for 1.19-2.38 micron (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">,</span>
+                   <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.153</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span>
+                   <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">,</span> <span class="mf">0.250</span><span class="p">)</span>
+<span class="c1"># Sea ice surf. albedo for 2.38-4.00 microns (snow covered; Ebert and Curry, 1993)</span>
+<span class="n">ci_albedo</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span>
+                   <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.030</span><span class="p">,</span> <span class="mf">0.036</span><span class="p">,</span> <span class="mf">0.036</span><span class="p">,</span>
+                   <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">)</span>
+
+<span class="c1"># ozone sonde stations</span>
+<span class="n">ozone_files</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Flight_20210629a</span><span class="o">=</span><span class="s2">&quot;sc210624.b11&quot;</span><span class="p">,</span>
+                   <span class="n">RF16</span><span class="o">=</span><span class="s2">&quot;ny220413.b16&quot;</span><span class="p">,</span> <span class="n">RF17</span><span class="o">=</span><span class="s2">&quot;ny220413.b16&quot;</span><span class="p">,</span> <span class="n">RF18</span><span class="o">=</span><span class="s2">&quot;ny220413.b16&quot;</span><span class="p">)</span>
+
+<span class="c1"># plotting metadata</span>
+<span class="n">figsize_wide</span> <span class="o">=</span> <span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="n">cm</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">cm</span><span class="p">)</span>
+<span class="n">figsize_equal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span> <span class="o">*</span> <span class="n">cm</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">cm</span><span class="p">)</span>
+<span class="n">plot_units</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cloud_fraction</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">clwc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">ciwc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">cswc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span>
+                  <span class="n">q_ice</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">q_liquid</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">iwp</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;g$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">iwc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$m$^{-3}$&quot;</span><span class="p">,</span>
+                  <span class="n">crwc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;g$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">re_ice</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\mu$m&quot;</span><span class="p">,</span> <span class="n">re_liquid</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\mu$m&quot;</span><span class="p">,</span>
+                  <span class="n">heating_rate_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span> <span class="n">heating_rate_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span>
+                  <span class="n">heating_rate_net</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span>
+                  <span class="n">flux_dn_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">flux_dn_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">flux_up_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
+                  <span class="n">flux_up_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
+                  <span class="n">cre_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">cre_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">cre_total</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
+                  <span class="n">transmissivity_sw</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">transmissivity_lw</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">reflectivity_sw</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">reflectivity_lw</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                  <span class="n">od</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scat_od</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">od_mean</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scat_od_mean</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">g</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">g_mean</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">od_int</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">scat_od_int</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">g_int</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                  <span class="n">absorption</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">absorption_int</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                  <span class="n">eglo</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}\,$nm$^{-1}$&quot;</span><span class="p">,</span> <span class="n">eglo_int</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">eup</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}\,$nm$^{-1}$&quot;</span><span class="p">,</span>
+                  <span class="n">eup_int</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">)</span>
+
+<span class="n">cbarlabels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cloud_fraction</span><span class="o">=</span><span class="s2">&quot;Cloud fraction&quot;</span><span class="p">,</span> <span class="n">clwc</span><span class="o">=</span><span class="s2">&quot;Cloud liquid water content&quot;</span><span class="p">,</span> <span class="n">ciwc</span><span class="o">=</span><span class="s2">&quot;Cloud ice water content&quot;</span><span class="p">,</span>
+                  <span class="n">cswc</span><span class="o">=</span><span class="s2">&quot;Cloud snow water content&quot;</span><span class="p">,</span> <span class="n">crwc</span><span class="o">=</span><span class="s2">&quot;Cloud rain water content&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="s2">&quot;Temperature&quot;</span><span class="p">,</span>
+                  <span class="n">q</span><span class="o">=</span><span class="s2">&quot;Specific humidity&quot;</span><span class="p">,</span> <span class="n">q_ice</span><span class="o">=</span><span class="s2">&quot;Ice mass mixing ratio&quot;</span><span class="p">,</span> <span class="n">q_liquid</span><span class="o">=</span><span class="s2">&quot;Liquid mass mixing ratio&quot;</span><span class="p">,</span>
+                  <span class="n">iwp</span><span class="o">=</span><span class="s2">&quot;Ice water path&quot;</span><span class="p">,</span> <span class="n">iwc</span><span class="o">=</span><span class="s2">&quot;Ice water content&quot;</span><span class="p">,</span>
+                  <span class="n">re_ice</span><span class="o">=</span><span class="s2">&quot;Ice effective radius&quot;</span><span class="p">,</span> <span class="n">re_liquid</span><span class="o">=</span><span class="s2">&quot;Liquid effective radius&quot;</span><span class="p">,</span>
+                  <span class="n">heating_rate_sw</span><span class="o">=</span><span class="s2">&quot;Solar heating rate&quot;</span><span class="p">,</span> <span class="n">heating_rate_lw</span><span class="o">=</span><span class="s2">&quot;Terrestrial heating rate&quot;</span><span class="p">,</span>
+                  <span class="n">heating_rate_net</span><span class="o">=</span><span class="s2">&quot;Net heating rate&quot;</span><span class="p">,</span>
+                  <span class="n">transmissivity_sw</span><span class="o">=</span><span class="s2">&quot;Solar transmissivity&quot;</span><span class="p">,</span> <span class="n">transmissivity_lw</span><span class="o">=</span><span class="s2">&quot;Terrestrial transmissivity&quot;</span><span class="p">,</span>
+                  <span class="n">reflectivity_sw</span><span class="o">=</span><span class="s2">&quot;Solar reflectivity&quot;</span><span class="p">,</span> <span class="n">reflectivity_lw</span><span class="o">=</span><span class="s2">&quot;Terrestrial reflectivity&quot;</span><span class="p">,</span>
+                  <span class="n">flux_dn_sw</span><span class="o">=</span><span class="s2">&quot;Downward solar irradiance&quot;</span><span class="p">,</span> <span class="n">flux_up_sw</span><span class="o">=</span><span class="s2">&quot;Upward solar irradiance&quot;</span><span class="p">,</span>
+                  <span class="n">flux_dn_lw</span><span class="o">=</span><span class="s2">&quot;Downward terrestrial irradiance&quot;</span><span class="p">,</span> <span class="n">flux_up_lw</span><span class="o">=</span><span class="s2">&quot;Upward terrestrial irradiance&quot;</span><span class="p">,</span>
+                  <span class="n">cre_sw</span><span class="o">=</span><span class="s2">&quot;Solar cloud radiative effect&quot;</span><span class="p">,</span> <span class="n">cre_lw</span><span class="o">=</span><span class="s2">&quot;Terrestrial cloud radiative effect&quot;</span><span class="p">,</span>
+                  <span class="n">cre_total</span><span class="o">=</span><span class="s2">&quot;Total cloud radiative effect&quot;</span><span class="p">,</span>
+                  <span class="n">od</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Total optical depth&quot;</span><span class="p">,</span> <span class="n">scat_od</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Scattering optical depth&quot;</span><span class="p">,</span> <span class="n">od_mean</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Mean total optical depth&quot;</span><span class="p">,</span>
+                  <span class="n">scat_od_mean</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Mean scattering optical depth&quot;</span><span class="p">,</span> <span class="n">g</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Asymmetry factor&quot;</span><span class="p">,</span> <span class="n">g_mean</span><span class="o">=</span><span class="s2">&quot;Mean asymmetry factor&quot;</span><span class="p">,</span>
+                  <span class="n">od_int</span><span class="o">=</span><span class="s2">&quot;Integrated total optical depth&quot;</span><span class="p">,</span> <span class="n">scat_od_int</span><span class="o">=</span><span class="s2">&quot;Integrated scattering optical depth&quot;</span><span class="p">,</span>
+                  <span class="n">absorption</span><span class="o">=</span><span class="s2">&quot;Absorption&quot;</span><span class="p">,</span> <span class="n">absorption_int</span><span class="o">=</span><span class="s2">&quot;Integrated absorption&quot;</span><span class="p">,</span>
+                  <span class="n">eglo</span><span class="o">=</span><span class="s2">&quot;Spectral global downward irradiance&quot;</span><span class="p">,</span> <span class="n">eglo_int</span><span class="o">=</span><span class="s2">&quot;Global downward irradiance&quot;</span><span class="p">,</span>
+                  <span class="n">eup</span><span class="o">=</span><span class="s2">&quot;Spectral diffuse upward irradiance&quot;</span><span class="p">,</span> <span class="n">eup_int</span><span class="o">=</span><span class="s2">&quot;Diffuse upward irradiance&quot;</span><span class="p">)</span>
+
+<span class="n">scale_factors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cloud_fraction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">clwc</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">ciwc</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">cswc</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">crwc</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">re_ice</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span>
+                     <span class="n">re_liquid</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">q_ice</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">q_liquid</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">iwp</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">iwc</span><span class="o">=</span><span class="mf">1e6</span><span class="p">)</span>
+
+<span class="n">cmaps</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">prinsenvlag_r</span><span class="p">,</span>
+             <span class="n">ciwc</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span> <span class="n">cswc</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span>
+             <span class="n">crwc</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span> <span class="n">q_ice</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span>
+             <span class="n">iwp</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span> <span class="n">iwc</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.freeze&quot;</span><span class="p">,</span> <span class="mf">.25</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">),</span>
+             <span class="n">cloud_fraction</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">neutral</span><span class="p">,</span>
+             <span class="n">re_ice</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">cosmic_r</span><span class="p">,</span> <span class="n">re_liquid</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">cosmic_r</span><span class="p">,</span>
+             <span class="n">heating_rate_sw</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.ember_r&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">),</span> <span class="n">heating_rate_lw</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">fusion_r</span><span class="p">,</span>
+             <span class="n">heating_rate_net</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">fusion_r</span><span class="p">,</span>
+             <span class="n">cre_total</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">fusion_r</span><span class="p">,</span>
+             <span class="n">flux_dn_sw</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">get_sub_cmap</span><span class="p">(</span><span class="s2">&quot;cmr.torch&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">norms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">TwoSlopeNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">235</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">280</span><span class="p">),</span> <span class="n">clwc</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(),</span>
+             <span class="n">heating_rate_lw</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">TwoSlopeNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span>
+             <span class="n">heating_rate_net</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">TwoSlopeNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=-</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+             <span class="n">od</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">od_scat</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(),</span>
+             <span class="n">od_int</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">scat_od_int</span><span class="o">=</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">())</span>
+
+<span class="c1"># plotting dictionaries for BACARDI</span>
+<span class="n">bacardi_labels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">F_down_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{\downarrow, solar}$&quot;</span><span class="p">,</span> <span class="n">F_down_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{\downarrow, terrestrial}$&quot;</span><span class="p">,</span>
+                      <span class="n">F_up_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{\uparrow, solar}$&quot;</span><span class="p">,</span> <span class="n">F_up_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{\uparrow, terrestrial}$&quot;</span><span class="p">,</span>
+                      <span class="n">F_net_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{net, solar}$&quot;</span><span class="p">,</span> <span class="n">F_net_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{net, terrestrial}$&quot;</span><span class="p">,</span>
+                      <span class="n">CRE_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{solar}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">CRE_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{terrestrial}</span><span class="s2">$&quot;</span><span class="p">,</span>
+                      <span class="n">CRE_total</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{total}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_path">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.get_path">[docs]</a>
+<span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flight</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">campaign</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cirrus-hl&quot;</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read paths from the toml file according to the current working directory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: which path to return, see config.toml for possible values</span>
+<span class="sd">            flight: for which flight should the path be provided (e.g. Flight_20210625a for CIRRUS-HL or HALO-AC3_20220311_HALO_RF01 for HALO-AC3)</span>
+<span class="sd">            campaign: campaign for which the paths should be generated</span>
+<span class="sd">            instrument: if key=all which instrument to generate the path to? (e.g. BAHAMAS)</span>
+
+<span class="sd">        Returns: Path to specified data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># make sure to search for the config file in the project directory</span>
+    <span class="n">wk_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Searching for config.toml in </span><span class="si">{</span><span class="n">wk_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wk_dir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wk_dir</span><span class="si">}</span><span class="s2">/config.toml&quot;</span><span class="p">)[</span><span class="n">campaign</span><span class="p">][</span><span class="s2">&quot;jr_local&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">wk_dir</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/mnt&quot;</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wk_dir</span><span class="si">}</span><span class="s2">/config.toml&quot;</span><span class="p">)[</span><span class="n">campaign</span><span class="p">][</span><span class="s2">&quot;jr_ubuntu&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">wk_dir</span><span class="si">}</span><span class="s2">/config.toml&quot;</span><span class="p">)[</span><span class="n">campaign</span><span class="p">][</span><span class="s2">&quot;lim_server&quot;</span><span class="p">]</span>
+
+    <span class="n">flight</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">flight</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">flight</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;base_dir&quot;</span><span class="p">)</span>
+    <span class="n">paths</span><span class="p">[</span><span class="s2">&quot;base&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_dir</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+        <span class="n">paths</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">flight</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;calib&quot;</span><span class="p">,</span> <span class="s2">&quot;pixel_wl&quot;</span><span class="p">,</span> <span class="s2">&quot;lamp&quot;</span><span class="p">,</span> <span class="s2">&quot;panel&quot;</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">paths</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found no path for key: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> and campaign </span><span class="si">{</span><span class="n">campaign</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">paths</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">instrument</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">paths</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="make_dir">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.make_dir">[docs]</a>
+<span class="k">def</span> <span class="nf">make_dir</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates folder if it doesn&#39;t exist already.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder: folder name or full path</span>
+
+<span class="sd">    Returns: nothing, but creates a new folder if possible</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="delete_folder_contents">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.delete_folder_contents">[docs]</a>
+<span class="k">def</span> <span class="nf">delete_folder_contents</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes all files and subfolders in a folder.</span>
+<span class="sd">    From: https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder: folder name or full path</span>
+
+<span class="sd">    Returns: nothing, but deletes all files in a folder</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder</span><span class="p">)):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to delete </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2"> Reason: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="arg_nearest">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.arg_nearest">[docs]</a>
+<span class="k">def</span> <span class="nf">arg_nearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the index of the nearest value in an array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array: Input has to be convertible to an ndarray</span>
+<span class="sd">        value: Value to search for</span>
+
+<span class="sd">    Returns: index of closest value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">idx</span></div>
+
+
+
+<span class="c1"># from pyLARDA.Transformations</span>
+<div class="viewcode-block" id="set_xticks_and_xlabels">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.set_xticks_and_xlabels">[docs]</a>
+<span class="k">def</span> <span class="nf">set_xticks_and_xlabels</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">time_extend</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function sets the ticks and labels of the x-axis (only when the x-axis is time in UTC).</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">        -   time_extend &gt; 7 days:               major ticks every 2 day,  minor ticks every 12 hours</span>
+<span class="sd">        -   7 days &gt; time_extend &gt; 2 days:      major ticks every day, minor ticks every  6 hours</span>
+<span class="sd">        -   2 days &gt; time_extend &gt; 1 days:      major ticks every 12 hours, minor ticks every  3 hours</span>
+<span class="sd">        -   1 days &gt; time_extend &gt; 12 hours:    major ticks every 2 hours, minor ticks every  30 minutes</span>
+<span class="sd">        -   12hours &gt; time_extend &gt; 6 hours:    major ticks every 1 hours, minor ticks every  30 minutes</span>
+<span class="sd">        -   6 hours &gt; time_extend &gt; 2 hour:     major ticks every hour, minor ticks every  15 minutes</span>
+<span class="sd">        -   2 hours &gt; time_extend &gt; 30 min:     major ticks every 15 minutes, minor ticks every 5 minutes</span>
+<span class="sd">        -   30 min &gt; time_extend &gt; 5 min:       major ticks every 5 minutes, minor ticks every 1 minute</span>
+<span class="sd">        -   else:                               major ticks every minute, minor ticks every 10 seconds</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ax: axis in which the x-ticks and labels have to be set</span>
+<span class="sd">        time_extend: time difference of t_end - t_start (format datetime.timedelta)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ax - axis with new ticks and labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">time_extend</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DayLocator</span><span class="p">(</span><span class="n">bymonthday</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="se">\n</span><span class="s1">%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">45</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">SecondLocator</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="set_yticks_and_ylabels">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.set_yticks_and_ylabels">[docs]</a>
+<span class="k">def</span> <span class="nf">set_yticks_and_ylabels</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">time_extend</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function sets the ticks and labels of the y-axis (only when the y-axis is time in UTC).</span>
+
+<span class="sd">    Options:</span>
+<span class="sd">        -   time_extend &gt; 7 days:               major ticks every 2 day,  minor ticks every 12 hours</span>
+<span class="sd">        -   7 days &gt; time_extend &gt; 2 days:      major ticks every day, minor ticks every  6 hours</span>
+<span class="sd">        -   2 days &gt; time_extend &gt; 1 days:      major ticks every 12 hours, minor ticks every  3 hours</span>
+<span class="sd">        -   1 days &gt; time_extend &gt; 12 hours:    major ticks every 2 hours, minor ticks every  30 minutes</span>
+<span class="sd">        -   12hours &gt; time_extend &gt; 6 hours:    major ticks every 1 hours, minor ticks every  30 minutes</span>
+<span class="sd">        -   6 hours &gt; time_extend &gt; 2 hour:     major ticks every hour, minor ticks every  15 minutes</span>
+<span class="sd">        -   2 hours &gt; time_extend &gt; 15 min:     major ticks every 15 minutes, minor ticks every 5 minutes</span>
+<span class="sd">        -   15 min &gt; time_extend &gt; 5 min:       major ticks every 15 minutes, minor ticks every 5 minutes</span>
+<span class="sd">        -   else:                               major ticks every minute, minor ticks every 10 seconds</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ax: axis in which the y-ticks and labels have to be set</span>
+<span class="sd">        time_extend: time difference of t_end - t_start (format datetime.timedelta)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ax - axis with new ticks and labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">time_extend</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DayLocator</span><span class="p">(</span><span class="n">bymonthday</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%b </span><span class="si">%d</span><span class="se">\n</span><span class="s1">%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">12</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">byhour</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">HourLocator</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_extend</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%H:%M&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">MinuteLocator</span><span class="p">(</span><span class="n">byminute</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">SecondLocator</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="set_cb_friendly_colors">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.set_cb_friendly_colors">[docs]</a>
+<span class="k">def</span> <span class="nf">set_cb_friendly_colors</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set new colorblind friendly color cycle.</span>
+
+<span class="sd">    Returns: Modifies the standard pyplot color cycle</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cb_color_cycle</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#88CCEE&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC6677&quot;</span><span class="p">,</span> <span class="s2">&quot;#DDCC77&quot;</span><span class="p">,</span> <span class="s2">&quot;#117733&quot;</span><span class="p">,</span> <span class="s2">&quot;#332288&quot;</span><span class="p">,</span> <span class="s2">&quot;#AA4499&quot;</span><span class="p">,</span> <span class="s2">&quot;#44AA99&quot;</span><span class="p">,</span> <span class="s2">&quot;#999933&quot;</span><span class="p">,</span> <span class="s2">&quot;#882255&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;#661100&quot;</span><span class="p">,</span> <span class="s2">&quot;#6699CC&quot;</span><span class="p">,</span> <span class="s2">&quot;#888888&quot;</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cycler</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">cb_color_cycle</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_cb_friendly_colors">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.get_cb_friendly_colors">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cb_friendly_colors</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get colorblind friendly color cycle.</span>
+
+<span class="sd">    Returns: List with colorblind friendly colors</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;#88CCEE&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC6677&quot;</span><span class="p">,</span> <span class="s2">&quot;#DDCC77&quot;</span><span class="p">,</span> <span class="s2">&quot;#117733&quot;</span><span class="p">,</span> <span class="s2">&quot;#332288&quot;</span><span class="p">,</span> <span class="s2">&quot;#AA4499&quot;</span><span class="p">,</span> <span class="s2">&quot;#44AA99&quot;</span><span class="p">,</span> <span class="s2">&quot;#999933&quot;</span><span class="p">,</span> <span class="s2">&quot;#882255&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#661100&quot;</span><span class="p">,</span> <span class="s2">&quot;#6699CC&quot;</span><span class="p">,</span> <span class="s2">&quot;#888888&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="nested_dict_values_iterator">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.nested_dict_values_iterator">[docs]</a>
+<span class="k">def</span> <span class="nf">nested_dict_values_iterator</span><span class="p">(</span><span class="n">dict_obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Loop over all values in a nested dictionary</span>
+<span class="sd">    See: https://thispointer.com/python-iterate-loop-over-all-nested-dictionary-values/</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dict_obj: nested dictionary</span>
+
+<span class="sd">    Returns: Each value in a nested dictionary</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Iterate over all values of dict argument</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_obj</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="c1"># Check if value is of dict type</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># If value is dict then iterate over all its values</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_dict_values_iterator</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If value is not dict type then yield the value</span>
+            <span class="k">yield</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="nested_dict_pairs_iterator">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.nested_dict_pairs_iterator">[docs]</a>
+<span class="k">def</span> <span class="nf">nested_dict_pairs_iterator</span><span class="p">(</span><span class="n">dict_obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Loop over all values in a nested dictionary and return the key, value pair</span>
+<span class="sd">    See: https://thispointer.com/python-how-to-iterate-over-nested-dictionary-dict-of-dicts/</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dict_obj: nested dictionary</span>
+
+<span class="sd">    Returns: Each value in a nested dictionary with its key</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Iterate over all values of dict argument</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_obj</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Check if value is of dict type</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># If value is dict then iterate over all its values</span>
+            <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">nested_dict_pairs_iterator</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">pair</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If value is not dict type then yield the key, value pair</span>
+            <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="setup_logging">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.setup_logging">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_logging</span><span class="p">(</span><span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">custom_string</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Setup up logging to file if script is called from console. If it is executed inside a console setup logging only</span>
+<span class="sd">    to console.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dir: Directory where to save logging file. Gets created if it doesn&#39;t exist yet.</span>
+<span class="sd">        file: Name of the file which called the function. Should be given via the __file__ attribute.</span>
+<span class="sd">        custom_string: Custom String to append to logging file name. Logging file always starts with date and the name</span>
+<span class="sd">                       of the script being called.</span>
+
+<span class="sd">    Returns: Logger</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;pylim&quot;</span><span class="p">)</span>
+    <span class="c1"># remove existing handlers, necessary when function is called in a loop</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">handlers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="c1"># create file handler which logs even debug messages</span>
+        <span class="n">make_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">dir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="si">:</span><span class="s1">%Y%m%d</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">file</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">custom_string</span><span class="si">}</span><span class="s1">.log&#39;</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="c1"># create console handler with a higher log level</span>
+        <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="c1"># create formatter and add it to the handlers</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> : </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%c</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="c1"># add the handlers to logger</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># __file__ is undefined if script is executed in console, set a normal logger instead</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">())</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">log</span></div>
+
+
+
+<span class="c1"># from pyLARDA.SpectraProcessing</span>
+<span class="k">def</span> <span class="nf">seconds_to_fstring</span><span class="p">(</span><span class="n">time_diff</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">time_diff</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="read_command_line_args">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.read_command_line_args">[docs]</a>
+<span class="k">def</span> <span class="nf">read_command_line_args</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read out command line arguments and save them to a dictionary. Expects arguments in the form key=value.</span>
+
+<span class="sd">    Returns: dictionary with command line arguments as dict[key] = value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+            <span class="n">args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">args</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">set_cdo_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/home/jroettenbacher/.conda/envs/phd_base/bin/cdo&quot;</span><span class="p">):</span>
+    <span class="c1"># add cdo path to python environment</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CDO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="generate_specific_rows">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.generate_specific_rows">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_specific_rows</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">userows</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for trajectory plotting&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">userows</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">line</span></div>
+
+
+
+<div class="viewcode-block" id="make_flag">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.make_flag">[docs]</a>
+<span class="k">def</span> <span class="nf">make_flag</span><span class="p">(</span><span class="n">boolean_array</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a list of flag values for plotting using a boolean array as input</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        boolean_array: array like input with True and False</span>
+<span class="sd">        name: replace True with this string</span>
+
+<span class="sd">    Returns: list with as many strings as there are True values in the input array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">boolean_array</span><span class="p">)</span>  <span class="c1"># convert to numpy.ndarray</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">array</span> <span class="k">if</span> <span class="n">a</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="find_bases_tops">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.find_bases_tops">[docs]</a>
+<span class="k">def</span> <span class="nf">find_bases_tops</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">rg_list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function finds cloud bases and tops for a provided binary cloud mask.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        mask (np.array, dtype=bool) : bool array containing False = signal, True=no-signal</span>
+<span class="sd">        rg_list (np.ndarray) : array of range values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cloud_prop (list) : list containing a dict for every time step consisting of cloud bases/top indices, range and width</span>
+<span class="sd">        cloud_mask (np.array) : integer array, containing +1 for cloud tops, -1 for cloud bases and 0 for fill_value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cloud_prop</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cloud_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="c1"># bug fix: add an emtpy first range gate to detect cloud bases of clouds which start at the first range gate</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">iT</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">cloud</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">g</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groupby</span><span class="p">(</span><span class="n">mask</span><span class="p">[</span><span class="n">iT</span><span class="p">,</span> <span class="p">:])]</span>
+        <span class="n">idx_cloud_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="n">prop</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">cloud</span><span class="p">])</span>
+        <span class="n">bases</span><span class="p">,</span> <span class="n">tops</span> <span class="o">=</span> <span class="n">idx_cloud_edges</span><span class="p">[</span><span class="mi">0</span><span class="p">:][::</span><span class="mi">2</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">idx_cloud_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:][::</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tops</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tops</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tops</span><span class="p">]</span>  <span class="c1"># reduce top indices by 1 to account for the introduced row</span>
+            <span class="k">if</span> <span class="n">tops</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">cloud_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">tops</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># account for python starting counting at 0</span>
+        <span class="k">if</span> <span class="n">bases</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bases</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">]</span>  <span class="c1"># reduce base indices by 1 to account for the introduced row</span>
+        <span class="n">cloud_mask</span><span class="p">[</span><span class="n">iT</span><span class="p">,</span> <span class="n">bases</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">cloud_mask</span><span class="p">[</span><span class="n">iT</span><span class="p">,</span> <span class="n">tops</span><span class="p">]</span> <span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+        <span class="n">cloud_prop</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;idx_cb&#39;</span><span class="p">:</span> <span class="n">bases</span><span class="p">,</span> <span class="s1">&#39;val_cb&#39;</span><span class="p">:</span> <span class="n">rg_list</span><span class="p">[</span><span class="n">bases</span><span class="p">],</span>  <span class="c1"># cloud bases</span>
+                           <span class="s1">&#39;idx_ct&#39;</span><span class="p">:</span> <span class="n">tops</span><span class="p">,</span> <span class="s1">&#39;val_ct&#39;</span><span class="p">:</span> <span class="n">rg_list</span><span class="p">[</span><span class="n">tops</span><span class="p">],</span>  <span class="c1"># cloud tops</span>
+                           <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">ct</span> <span class="o">-</span> <span class="n">cb</span> <span class="k">for</span> <span class="n">ct</span><span class="p">,</span> <span class="n">cb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rg_list</span><span class="p">[</span><span class="n">tops</span><span class="p">],</span> <span class="n">rg_list</span><span class="p">[</span><span class="n">bases</span><span class="p">])]</span>
+                           <span class="p">})</span>
+    <span class="k">return</span> <span class="n">cloud_prop</span><span class="p">,</span> <span class="n">cloud_mask</span></div>
+
+
+
+<div class="viewcode-block" id="longitude_values_for_gaussian_grid">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.longitude_values_for_gaussian_grid">[docs]</a>
+<span class="k">def</span> <span class="nf">longitude_values_for_gaussian_grid</span><span class="p">(</span><span class="n">latitudes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                       <span class="n">n_points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+                                       <span class="n">longitude_boundaries</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the longitude values for each latitude circle on a reduced Gaussian grid.</span>
+<span class="sd">    If the longitude boundaries are given only the longitude values within these boundaries are returned.</span>
+
+<span class="sd">    The ECMWF uses regular/reduced Gaussian grids to represent their model data.</span>
+<span class="sd">    These have a fixed number of latitudes between the equator and each pole with either a regular amount of longitude</span>
+<span class="sd">    points on each latitude ring or in case of a reduced Gaussian grid with a decreasing number of points towards the</span>
+<span class="sd">    poles on each latitude ring.</span>
+<span class="sd">    For more information on Gaussian grids as used by the ECMWF see: https://confluence.ecmwf.int/display/FCST/Gaussian+grids</span>
+
+<span class="sd">    When retrieving data on a reduced Gaussian grid the exact longitude values are not included in the data set and have</span>
+<span class="sd">    to be calculated according to the definition of the grid.</span>
+<span class="sd">    For this the latitude rings (latitudes) and the amount of longitude points on each latitude ring is needed (n_points).</span>
+<span class="sd">    As one rarely retrieves the whole domain of the model the longitude boundaries are also needed to return the correct</span>
+<span class="sd">    longitude values.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        latitudes: The latitude values of the Gaussian grid starting in the North</span>
+<span class="sd">        n_points: The number of longitude points on each latitude circle (needs to be of same length as latitudes)</span>
+<span class="sd">        longitude_boundaries: The longitude boundaries (E, W). E =-90, W =90, N=0, S=-180/180</span>
+
+<span class="sd">    Returns: Two arrays with repeating latitude values and the corresponding longitude values</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">latitudes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_points</span><span class="p">),</span> <span class="s2">&quot;Number of latitudes does not match number of points given!&quot;</span>
+    <span class="n">lon_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">points</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">points</span> <span class="ow">in</span> <span class="n">n_points</span><span class="p">]</span>
+    <span class="n">lon_values_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">lon_values_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lons</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lon_values</span><span class="p">):</span>
+        <span class="n">all_lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="n">lons</span><span class="o">+</span><span class="mi">180</span><span class="p">)</span><span class="o">%</span><span class="mi">360</span> <span class="o">-</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_lons</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">all_lons</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;Non unique longitude values found for </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">! Check input!&quot;</span>
+        <span class="k">if</span> <span class="n">longitude_boundaries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_lons</span> <span class="o">=</span> <span class="n">all_lons</span><span class="p">[(</span><span class="n">all_lons</span> <span class="o">&gt;=</span> <span class="n">longitude_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">all_lons</span> <span class="o">&lt;=</span> <span class="n">longitude_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">all_lons</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">lon_values_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">lon_values_out</span><span class="p">,</span> <span class="n">all_lons</span><span class="p">])</span>
+        <span class="n">lon_values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_lons</span><span class="p">)</span>
+
+    <span class="c1"># create list of latitude values as coordinate</span>
+    <span class="n">lat_values_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lon_array</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lon_values_list</span><span class="p">):</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">latitudes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lon_array</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">lat_values_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">lat_values_out</span><span class="p">,</span> <span class="n">lat</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">lat_values_out</span><span class="p">,</span> <span class="n">lon_values_out</span></div>
+
+
+
+<div class="viewcode-block" id="hellinger_distance">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.hellinger_distance">[docs]</a>
+<span class="k">def</span> <span class="nf">hellinger_distance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the Hellinger distance between two probability distributions.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    p (numpy array): Probability distribution 1 (e.g., histogram).</span>
+<span class="sd">    q (numpy array): Probability distribution 2 (e.g., histogram).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    float: Hellinger distance between the two distributions.</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    - https://en.wikipedia.org/wiki/Hellinger_distance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure that p and q have the same shape</span>
+    <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;Input distributions must have the same shape.&quot;</span>
+
+    <span class="c1"># Calculate the Hellinger distance</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">h</span></div>
+
+
+
+<span class="n">_COLORS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="s2">&quot;#3cb371&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;darkgreen&quot;</span><span class="p">:</span> <span class="s2">&quot;#253A24&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightgreen&quot;</span><span class="p">:</span> <span class="s2">&quot;#70EB5D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;yellowgreen&quot;</span><span class="p">:</span> <span class="s2">&quot;#C7FA3A&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;yellow&quot;</span><span class="p">:</span> <span class="s2">&quot;#FFE744&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;orange&quot;</span><span class="p">:</span> <span class="s2">&quot;#ffa500&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pink&quot;</span><span class="p">:</span> <span class="s2">&quot;#B43757&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="s2">&quot;#F57150&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;shockred&quot;</span><span class="p">:</span> <span class="s2">&quot;#E64A23&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;seaweed&quot;</span><span class="p">:</span> <span class="s2">&quot;#646F5E&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;seaweed_roll&quot;</span><span class="p">:</span> <span class="s2">&quot;#748269&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;white&quot;</span><span class="p">:</span> <span class="s2">&quot;#ffffff&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightblue&quot;</span><span class="p">:</span> <span class="s2">&quot;#6CFFEC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="s2">&quot;#209FF3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;skyblue&quot;</span><span class="p">:</span> <span class="s2">&quot;#CDF5F6&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;darksky&quot;</span><span class="p">:</span> <span class="s2">&quot;#76A9AB&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;darkpurple&quot;</span><span class="p">:</span> <span class="s2">&quot;#464AB9&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightpurple&quot;</span><span class="p">:</span> <span class="s2">&quot;#6A5ACD&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;purple&quot;</span><span class="p">:</span> <span class="s2">&quot;#BF9AFF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;darkgray&quot;</span><span class="p">:</span> <span class="s2">&quot;#2f4f4f&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightgray&quot;</span><span class="p">:</span> <span class="s2">&quot;#ECECEC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gray&quot;</span><span class="p">:</span> <span class="s2">&quot;#d3d3d3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightbrown&quot;</span><span class="p">:</span> <span class="s2">&quot;#CEBC89&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lightsteel&quot;</span><span class="p">:</span> <span class="s2">&quot;#a0b0bb&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;steelblue&quot;</span><span class="p">:</span> <span class="s2">&quot;#4682b4&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="s2">&quot;#C8C8C8&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_CLABEL</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;target_classification&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;_Clear sky&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Droplets&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;lightblue&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Drizzle or rain&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Drizzle &amp; droplets&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;purple&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Ice&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;lightsteel&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Ice &amp; droplets&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;darkpurple&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Melting ice&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Melting &amp; droplets&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;yellowgreen&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Aerosols&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;lightbrown&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Insects&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;shockred&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Aerosols &amp; insects&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;pink&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;No data&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;detection_status&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;_Clear sky&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Lidar only&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Uncorrected atten.&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;seaweed_roll&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Radar &amp; lidar&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;_No radar but unknown atten.&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;purple&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Radar only&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;lightgreen&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;_No radar but known atten.&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Corrected atten.&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;skyblue&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;Clutter&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;shockred&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;_Lidar molecular scattering&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;pink&quot;</span><span class="p">]),</span>
+        <span class="p">(</span><span class="s2">&quot;No data&quot;</span><span class="p">,</span> <span class="n">_COLORS</span><span class="p">[</span><span class="s2">&quot;mask&quot;</span><span class="p">]),)</span>
+<span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-, Radiation Group LIM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

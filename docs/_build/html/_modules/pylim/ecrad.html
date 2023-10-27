@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pylim.ecrad &mdash; pylim 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pylim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.ecrad</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pylim.ecrad</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Functions translated from FORTRAN code in ecRad</span>
+
+<span class="sd">*author*: Johannes Röttenbacher</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">importlib_resources</span> <span class="k">as</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">pylim.helpers</span> <span class="k">as</span> <span class="nn">h</span>
+<span class="kn">import</span> <span class="nn">pylim.meteorological_formulas</span> <span class="k">as</span> <span class="nn">met</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">version_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">v15</span><span class="o">=</span><span class="s2">&quot;Fu-IFS&quot;</span><span class="p">,</span>
+    <span class="n">v16</span><span class="o">=</span><span class="s2">&quot;Fu-IFS VarCloud&quot;</span><span class="p">,</span>
+    <span class="n">v17</span><span class="o">=</span><span class="s2">&quot;Fu-IFS VarCloud&quot;</span><span class="p">,</span>
+    <span class="n">v18</span><span class="o">=</span><span class="s2">&quot;Baran2016&quot;</span><span class="p">,</span>
+    <span class="n">v19</span><span class="o">=</span><span class="s2">&quot;Yi&quot;</span><span class="p">,</span>
+    <span class="n">v20</span><span class="o">=</span><span class="s2">&quot;Baran2016 VarCloud&quot;</span><span class="p">,</span>
+    <span class="n">v21</span><span class="o">=</span><span class="s2">&quot;Baran2016 VarCloud&quot;</span><span class="p">,</span>
+    <span class="n">v22</span><span class="o">=</span><span class="s2">&quot;Fu-IFS 3D&quot;</span><span class="p">,</span>
+    <span class="n">v28</span><span class="o">=</span><span class="s2">&quot;Yi VarCloud&quot;</span><span class="p">,</span>
+    <span class="n">v29</span><span class="o">=</span><span class="s2">&quot;Yi VarCloud&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># which ice optic parameterization is used by which namelist version</span>
+<span class="n">ice_optic_parameterizations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">fu</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;v1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v8&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v10&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v11&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v12&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v13&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v13.1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v13.2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v14&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v15&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v16&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v17&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v22&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v23&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;v26&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">baran2016</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;v6&quot;</span><span class="p">,</span> <span class="s2">&quot;v7&quot;</span><span class="p">,</span> <span class="s2">&quot;v9&quot;</span><span class="p">,</span> <span class="s2">&quot;v18&quot;</span><span class="p">,</span> <span class="s2">&quot;v20&quot;</span><span class="p">,</span> <span class="s2">&quot;v21&quot;</span><span class="p">,</span> <span class="s2">&quot;v24&quot;</span><span class="p">,</span> <span class="s2">&quot;v25&quot;</span><span class="p">,</span> <span class="s2">&quot;v27&quot;</span><span class="p">],</span>
+    <span class="n">yi</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;v4&quot;</span><span class="p">,</span> <span class="s2">&quot;v19&quot;</span><span class="p">,</span> <span class="s2">&quot;v28&quot;</span><span class="p">,</span> <span class="s2">&quot;v29&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="ice_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.ice_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">ice_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_ICE</span><span class="p">,</span> <span class="n">PQ_SNOW</span><span class="p">,</span> <span class="n">PLAT</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From ice_effective_radius.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2016- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Purpose:</span>
+<span class="sd">    |   Calculate effective radius of ice clouds</span>
+
+<span class="sd">    | Author:</span>
+<span class="sd">    |   Robin Hogan, ECMWF (using code extracted from radlswr.F90)</span>
+<span class="sd">    |   Original: 2016-02-24</span>
+
+<span class="sd">    | Modifications:</span>
+<span class="sd">    |   2022-09-22  J. Röttenbacher translated Sun and Rikus part to python3</span>
+
+<span class="sd">    Ice effective radius = f(T,IWC) from Sun and Rikus (1999), revised by Sun (2001)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        PPRESSURE: (Pa)</span>
+<span class="sd">        PTEMPERATURE: (K)</span>
+<span class="sd">        PCLOUD_FRAC: (kg/kg)</span>
+<span class="sd">        PQ_ICE: (kg/kg)</span>
+<span class="sd">        PQ_SNOW: (kg/kg)</span>
+<span class="sd">        PLAT: (degrees)</span>
+
+<span class="sd">    Returns: ice effective radius in meter</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># constants</span>
+    <span class="n">RRE2DE</span> <span class="o">=</span> <span class="mf">0.64952</span>  <span class="c1"># from suecrad.f90</span>
+    <span class="n">RMIN_ICE</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># min ice diameter (um)</span>
+    <span class="n">RTT</span> <span class="o">=</span> <span class="mf">273.15</span>  <span class="c1"># temperature of fusion of water (K)</span>
+    <span class="n">RD</span> <span class="o">=</span> <span class="mi">287</span>  <span class="c1"># J kg-1 K-1</span>
+
+    <span class="n">ZDEFAULT_RE_UM</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">*</span> <span class="n">RRE2DE</span>
+    <span class="n">ZMIN_DIAMETER_UM</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">+</span> <span class="p">(</span><span class="n">RMIN_ICE</span> <span class="o">-</span> <span class="mi">20</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">PLAT</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># Ice effective radius varies with latitude, smaller at poles</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">PCLOUD_FRAC</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">PQ_ICE</span> <span class="o">+</span> <span class="n">PQ_SNOW</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>  <span class="c1"># Consider only cloudy regions</span>
+        <span class="n">ZAIR_DENSITY_GM3</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">PPRESSURE</span> <span class="o">/</span> <span class="p">(</span><span class="n">RD</span> <span class="o">*</span> <span class="n">PTEMPERATURE</span><span class="p">)</span>
+        <span class="n">ZIWC_INCLOUD_GM3</span> <span class="o">=</span> <span class="n">ZAIR_DENSITY_GM3</span> <span class="o">*</span> <span class="p">(</span><span class="n">PQ_ICE</span> <span class="o">+</span> <span class="n">PQ_SNOW</span><span class="p">)</span> <span class="o">/</span> <span class="n">PCLOUD_FRAC</span>
+        <span class="n">PTEMPERATURE_C</span> <span class="o">=</span> <span class="n">PTEMPERATURE</span> <span class="o">-</span> <span class="n">RTT</span>
+        <span class="c1">#  Sun, 2001(corrected from Sun &amp; Rikus, 1999)</span>
+        <span class="n">ZAIWC</span> <span class="o">=</span> <span class="mf">45.8966</span> <span class="o">*</span> <span class="n">ZIWC_INCLOUD_GM3</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.2214</span><span class="p">)</span>
+        <span class="n">ZBIWC</span> <span class="o">=</span> <span class="mf">0.7957</span> <span class="o">*</span> <span class="n">ZIWC_INCLOUD_GM3</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.2535</span><span class="p">)</span>
+        <span class="n">ZDIAMETER_UM</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.2351</span> <span class="o">+</span> <span class="mf">0.0105</span> <span class="o">*</span> <span class="n">PTEMPERATURE_C</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">ZAIWC</span> <span class="o">+</span> <span class="n">ZBIWC</span> <span class="o">*</span> <span class="p">(</span><span class="n">PTEMPERATURE</span> <span class="o">-</span> <span class="mf">83.15</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ZDIAMETER_UM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">ZDIAMETER_UM</span><span class="p">,</span> <span class="n">ZMIN_DIAMETER_UM</span><span class="p">]),</span> <span class="mi">155</span><span class="p">])</span>
+        <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">ZDIAMETER_UM</span> <span class="o">*</span> <span class="n">RRE2DE</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">ZDEFAULT_RE_UM</span>
+
+    <span class="k">return</span> <span class="n">PRE_UM</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
+
+
+
+<div class="viewcode-block" id="liquid_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.liquid_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">liquid_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_LIQ</span><span class="p">,</span> <span class="n">PQ_RAIN</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From liquid_effective_radius.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2015- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Purpose:</span>
+<span class="sd">    |   Calculate effective radius of liquid clouds</span>
+
+<span class="sd">    | Author:</span>
+<span class="sd">    |   Robin Hogan, ECMWF (using code extracted from radlswr.F90)</span>
+<span class="sd">    |   Original: 2015-09-24</span>
+
+<span class="sd">    | Modifications:</span>
+<span class="sd">    |   2022-09-22 J. Röttenbacher translated Martin et al. (JAS 1994) part to python3</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        PPRESSURE: (Pa)</span>
+<span class="sd">        PTEMPERATURE: (K)</span>
+<span class="sd">        PCLOUD_FRAC: (kg/kg)</span>
+<span class="sd">        PQ_LIQ: (kg/kg)</span>
+<span class="sd">        PQ_RAIN: (kg/kg)</span>
+
+<span class="sd">    Returns: liquid effective radius in meter after Martin et al. (JAS 1994)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># constants</span>
+    <span class="n">PP_MIN_RE_UM</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># min radius</span>
+    <span class="n">PP_MAX_RE_UM</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># max radius</span>
+    <span class="n">PCCN_SEA</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># my personal assumption!!!   better estimation???????</span>
+    <span class="c1"># PCCN_SEA = 20# for the liquid water section from flight 20160926a between 14.5 and 15.1 UTC, derived from modis tau and reff using my cdnc retrieval</span>
+    <span class="n">ZCCN</span> <span class="o">=</span> <span class="n">PCCN_SEA</span>
+    <span class="n">ZSPECTRAL_DISPERSION</span> <span class="o">=</span> <span class="mf">0.77</span>
+    <span class="n">R_DRY</span> <span class="o">=</span> <span class="mi">287</span>  <span class="c1"># J kg - 1 K - 1</span>
+    <span class="n">REPSCW</span> <span class="o">=</span> <span class="mf">1.0e-12</span>
+    <span class="n">REPLOG</span> <span class="o">=</span> <span class="mf">1.0e-12</span>
+
+    <span class="n">ZNTOT_CM3</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">1.15</span> <span class="o">*</span> <span class="mf">10e-3</span> <span class="o">*</span> <span class="n">ZCCN</span> <span class="o">*</span> <span class="n">ZCCN</span> <span class="o">+</span> <span class="mf">0.963</span> <span class="o">*</span> <span class="n">ZCCN</span> <span class="o">+</span> <span class="mf">5.3</span>
+    <span class="p">)</span>  <span class="c1"># JR: this is the ocean case</span>
+    <span class="n">ZRATIO</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.222</span> <span class="o">/</span> <span class="n">ZSPECTRAL_DISPERSION</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.333</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">PCLOUD_FRAC</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">PQ_LIQ</span> <span class="o">+</span> <span class="n">PQ_RAIN</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>  <span class="c1"># Consider only cloudy regions</span>
+        <span class="n">ZAIR_DENSITY_GM3</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">PPRESSURE</span> <span class="o">/</span> <span class="p">(</span><span class="n">R_DRY</span> <span class="o">*</span> <span class="n">PTEMPERATURE</span><span class="p">)</span>
+        <span class="c1"># In - cloud mean water contents found by dividing by cloud fraction</span>
+        <span class="n">ZLWC_GM3</span> <span class="o">=</span> <span class="n">ZAIR_DENSITY_GM3</span> <span class="o">*</span> <span class="n">PQ_LIQ</span> <span class="o">/</span> <span class="n">PCLOUD_FRAC</span>
+        <span class="n">ZRWC_GM3</span> <span class="o">=</span> <span class="n">ZAIR_DENSITY_GM3</span> <span class="o">*</span> <span class="n">PQ_RAIN</span> <span class="o">/</span> <span class="n">PCLOUD_FRAC</span>
+        <span class="k">if</span> <span class="n">ZLWC_GM3</span> <span class="o">&gt;</span> <span class="n">REPSCW</span><span class="p">:</span>
+            <span class="n">ZRAIN_RATIO</span> <span class="o">=</span> <span class="n">ZRWC_GM3</span> <span class="o">/</span> <span class="n">ZLWC_GM3</span>
+            <span class="n">ZWOOD_FACTOR</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">ZRAIN_RATIO</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.666</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">ZRATIO</span> <span class="o">*</span> <span class="n">ZRAIN_RATIO</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ZWOOD_FACTOR</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">ZRE_CUBED</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">ZLWC_GM3</span> <span class="o">+</span> <span class="n">ZRWC_GM3</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">ZNTOT_CM3</span> <span class="o">*</span> <span class="n">ZSPECTRAL_DISPERSION</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ZRE_CUBED</span> <span class="o">&gt;</span> <span class="n">REPLOG</span><span class="p">:</span>
+            <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">ZWOOD_FACTOR</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.333</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ZRE_CUBED</span><span class="p">))</span>
+            <span class="c1"># make sure calculated radius is within boarders</span>
+            <span class="k">if</span> <span class="n">PRE_UM</span> <span class="o">&lt;</span> <span class="n">PP_MIN_RE_UM</span><span class="p">:</span>
+                <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">PP_MIN_RE_UM</span>
+            <span class="k">if</span> <span class="n">PRE_UM</span> <span class="o">&gt;</span> <span class="n">PP_MAX_RE_UM</span><span class="p">:</span>
+                <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">PP_MAX_RE_UM</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">PP_MIN_RE_UM</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># when cloud fraction or liquid + rain water content too low to consider this as a cloud</span>
+        <span class="n">PRE_UM</span> <span class="o">=</span> <span class="n">PP_MIN_RE_UM</span>
+
+    <span class="k">return</span> <span class="n">PRE_UM</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
+
+
+
+<div class="viewcode-block" id="calc_ice_optics_baran2016">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2016">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_baran2016</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute ice-particle scattering properties using a parameterization as a function of ice water mixing ratio</span>
+<span class="sd">    and temperature.</span>
+
+<span class="sd">    From radiation_ice_optics_baran2016.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2016- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Author:  Robin Hogan</span>
+<span class="sd">    | Email:   r.j.hogan@ecmwf.int</span>
+
+<span class="sd">    | Modifications</span>
+<span class="sd">    |   2023-03-09  J. Röttenbacher  Translated to python3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bands: &#39;sw&#39; or &#39;lw&#39;, shortwave or longwave bands</span>
+<span class="sd">        ice_wp: Ice water path (kg m-2)</span>
+<span class="sd">        qi: Mixing ratio (kg kg-1)</span>
+<span class="sd">        temperature: Temperature (K)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        od: Total optical depth</span>
+<span class="sd">        scat_od: Scattering optical depth</span>
+<span class="sd">        g: Asymmetry factor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">max_qi</span> <span class="o">=</span> <span class="mf">1.0e-3</span>  <span class="c1"># maximum mixing ratio (kg kg-1)</span>
+    <span class="c1"># read in coefficients from netcdf file</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;pylim.data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="s2">&quot;baran2016_ice_scattering_rrtm.nc&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>  <span class="c1"># number of bands</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;coeff_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>  <span class="c1"># Band-specific coefficients</span>
+    <span class="n">T2</span> <span class="o">=</span> <span class="n">temperature</span> <span class="o">*</span> <span class="n">temperature</span>
+    <span class="n">qi_over_T4</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">T2</span> <span class="o">*</span> <span class="n">T2</span><span class="p">)</span>
+
+    <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">qi</span> <span class="o">&lt;</span> <span class="n">max_qi</span><span class="p">))</span>
+    <span class="n">qi_T</span> <span class="o">=</span> <span class="n">qi</span> <span class="o">*</span> <span class="n">temperature</span>
+    <span class="n">qi_T</span> <span class="o">=</span> <span class="n">qi_T</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="n">max_qi</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
+
+    <span class="n">od</span> <span class="o">=</span> <span class="n">ice_wp</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">qi_over_T4</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="n">od</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">qi_T</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">qi_T</span>
+
+    <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="calc_ice_optics_baran2017">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2017">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_baran2017</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute ice-particle scattering properties using a parameterization as a function of ice water mixing ratio</span>
+<span class="sd">    and temperature.</span>
+
+<span class="sd">    From radiation_ice_optics_baran2017.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2017- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Author:  Robin Hogan</span>
+<span class="sd">    | Email:   r.j.hogan@ecmwf.int</span>
+
+<span class="sd">    | Modifications</span>
+<span class="sd">    |   2023-03-06  J. Röttenbacher  Translated to python3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bands: &#39;sw&#39; or &#39;lw&#39;, shortwave or longwave bands</span>
+<span class="sd">        ice_wp: Ice water path (kg m-2)</span>
+<span class="sd">        qi: Mixing ratio (kg kg-1)</span>
+<span class="sd">        temperature: Temperature (K)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        od: Total optical depth</span>
+<span class="sd">        scat_od: Scattering optical depth</span>
+<span class="sd">        g: Asymmetry factor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># read in coefficients from netcdf file</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;pylim.data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="s2">&quot;baran2017_ice_scattering_rrtm.nc&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>  <span class="c1"># number of bands</span>
+    <span class="n">coeff_gen</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;coeff_gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># General coefficients</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;coeff_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>  <span class="c1"># Band-specific coefficients</span>
+    <span class="c1"># Modified ice mixing ratio, and the same raised to an appropriate power</span>
+    <span class="n">qi_mod</span> <span class="o">=</span> <span class="n">qi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">coeff_gen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">temperature</span> <span class="o">-</span> <span class="n">coeff_gen</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">qi_mod_od</span> <span class="o">=</span> <span class="n">qi_mod</span> <span class="o">**</span> <span class="n">coeff_gen</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">qi_mod_ssa</span> <span class="o">=</span> <span class="n">qi_mod</span> <span class="o">**</span> <span class="n">coeff_gen</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">qi_mod_g</span> <span class="o">=</span> <span class="n">qi_mod</span> <span class="o">**</span> <span class="n">coeff_gen</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="n">od</span> <span class="o">=</span> <span class="n">ice_wp</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">qi_mod_od</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="n">od</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">qi_mod_ssa</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">qi_mod_g</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">nb</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="calc_ice_optics_fu_sw">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_sw">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_fu_sw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute shortwave ice-particle scattering properties using Fu (1996) parameterization.</span>
+<span class="sd">    The asymmetry factor in band 14 goes larger than one for r_eff &gt; 100.8 um, so we cap r_eff at 100 um.</span>
+<span class="sd">    Asymmetry factor is capped at just less than 1 because if it is exactly 1 then delta-Eddington scaling leads to a</span>
+<span class="sd">    zero scattering optical depth and then division by zero.</span>
+
+<span class="sd">    From radiation_ice_optics_fu.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2014- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Author:  Robin Hogan</span>
+<span class="sd">    | Email:   r.j.hogan@ecmwf.int</span>
+
+<span class="sd">    | Modifications</span>
+<span class="sd">    |   2020-08-10  R. Hogan  Bounded r_eff to be &lt;= 100um and g to be &lt; 1.0</span>
+<span class="sd">    |   2023-03-06  J. Röttenbacher  Translated to python3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ice_wp: Ice water path (kg m-2)</span>
+<span class="sd">        r_eff: Effective radius (m)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        od: Total optical depth</span>
+<span class="sd">        scat_od: Scattering optical depth</span>
+<span class="sd">        g: Asymmetry factor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">MaxAsymmetryFactor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    <span class="n">MaxEffectiveRadius</span> <span class="o">=</span> <span class="mf">100.0e-6</span>  <span class="c1"># metres</span>
+    <span class="c1"># read in coefficients from netCDF file</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;pylim.data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="s2">&quot;fu_ice_scattering_rrtm_new.nc&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">coeff_sw1</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="mi">14</span>  <span class="c1"># number of shortwave bands</span>
+    <span class="n">od</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># Total optical depth</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># scattering optical depth</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># asymmetry factor</span>
+
+    <span class="c1"># cap effective radius at MaxEffectiveRadius and keep nan values</span>
+    <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">r_eff</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">r_eff</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">r_eff</span> <span class="o">&lt;</span> <span class="n">MaxEffectiveRadius</span><span class="p">))</span>
+    <span class="n">r_eff</span> <span class="o">=</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="n">MaxEffectiveRadius</span><span class="p">)</span>  <span class="c1"># cap effective radius</span>
+    <span class="c1"># Convert to effective diameter using the relationship in the IFS</span>
+    <span class="n">de_um</span> <span class="o">=</span> <span class="n">r_eff</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0e6</span> <span class="o">/</span> <span class="mf">0.64952</span><span class="p">)</span>  <span class="c1"># Fu&#39;s effective diameter (microns)</span>
+    <span class="n">inv_de_um</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">de_um</span>  <span class="c1"># and its inverse</span>
+    <span class="n">iwp_gm_2</span> <span class="o">=</span> <span class="n">ice_wp</span> <span class="o">*</span> <span class="mf">1000.0</span>  <span class="c1"># Ice water path in g m-2</span>
+
+    <span class="k">for</span> <span class="n">jb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb</span><span class="p">):</span>
+        <span class="n">od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">iwp_gm_2</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">inv_de_um</span><span class="p">)</span>
+        <span class="n">scat_od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="mf">1.0</span>
+            <span class="o">-</span> <span class="p">(</span>
+                <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">g_tmp</span> <span class="o">=</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_tmp</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
+            <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_tmp</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">g_tmp</span> <span class="o">&lt;</span> <span class="n">MaxAsymmetryFactor</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_tmp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="n">MaxAsymmetryFactor</span><span class="p">)</span>
+
+    <span class="c1"># convert to dataset with new dimension band_sw</span>
+    <span class="n">od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">od</span><span class="p">,</span> <span class="s2">&quot;band_sw&quot;</span><span class="p">)</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">scat_od</span><span class="p">,</span> <span class="s2">&quot;band_sw&quot;</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s2">&quot;band_sw&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="calc_ice_optics_fu_lw">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_lw">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_fu_lw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute longwave ice-particle scattering properties using Fu et al. (1998) parameterization.</span>
+
+<span class="sd">    From radiation_ice_optics_fu.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2014- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Author:  Robin Hogan</span>
+<span class="sd">    | Email:   r.j.hogan@ecmwf.int</span>
+
+<span class="sd">    | Modifications</span>
+<span class="sd">    |   2020-08-10  R. Hogan  Bounded r_eff to be &lt;= 100um and g to be &lt; 1.0</span>
+<span class="sd">    |   2023-03-06  J. Röttenbacher  Translated to python3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ice_wp: Ice water path (kg m-2)</span>
+<span class="sd">        r_eff: Effective radius (m)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        od: Total optical depth</span>
+<span class="sd">        scat_od: Scattering optical depth</span>
+<span class="sd">        g: Asymmetry factor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">MaxAsymmetryFactor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    <span class="n">MaxEffectiveRadius</span> <span class="o">=</span> <span class="mf">100.0e-6</span>  <span class="c1"># metres</span>
+    <span class="c1"># read in coefficients from netCDF file</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;pylim.data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="s2">&quot;fu_ice_scattering_rrtm_new.nc&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">coeff_lw1</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># number of longwave bands</span>
+    <span class="n">od</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># Total optical depth</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># scattering optical depth</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">nb</span>  <span class="c1"># asymmetry factor</span>
+
+    <span class="c1"># cap effective radius at MaxEffectiveRadius and keep nan values</span>
+    <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">r_eff</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">r_eff</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">r_eff</span> <span class="o">&lt;</span> <span class="n">MaxEffectiveRadius</span><span class="p">))</span>
+    <span class="n">r_eff</span> <span class="o">=</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="n">MaxEffectiveRadius</span><span class="p">)</span>  <span class="c1"># cap effective radius</span>
+    <span class="c1"># Convert to effective diameter using the relationship in the IFS</span>
+    <span class="n">de_um</span> <span class="o">=</span> <span class="n">r_eff</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0e6</span> <span class="o">/</span> <span class="mf">0.64952</span><span class="p">)</span>  <span class="c1"># Fu&#39;s effective diameter (microns)</span>
+    <span class="n">inv_de_um</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">de_um</span>  <span class="c1"># and its inverse</span>
+    <span class="n">iwp_gm_2</span> <span class="o">=</span> <span class="n">ice_wp</span> <span class="o">*</span> <span class="mf">1000.0</span>  <span class="c1"># Ice water path in g m-2</span>
+
+    <span class="k">for</span> <span class="n">jb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb</span><span class="p">):</span>
+        <span class="n">od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">iwp_gm_2</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">inv_de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">inv_de_um</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">scat_od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">od</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">-</span> <span class="n">iwp_gm_2</span> <span class="o">*</span> <span class="n">inv_de_um</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">6</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="n">g_tmp</span> <span class="o">=</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="n">de_um</span> <span class="o">*</span> <span class="n">coeff</span><span class="p">[</span><span class="n">jb</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_tmp</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span>
+            <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_tmp</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">g_tmp</span> <span class="o">&lt;</span> <span class="n">MaxAsymmetryFactor</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">jb</span><span class="p">]</span> <span class="o">=</span> <span class="n">g_tmp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="n">MaxAsymmetryFactor</span><span class="p">)</span>
+
+    <span class="c1"># convert to dataset with new dimension band_lw</span>
+    <span class="n">od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">od</span><span class="p">,</span> <span class="s2">&quot;band_lw&quot;</span><span class="p">)</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">scat_od</span><span class="p">,</span> <span class="s2">&quot;band_lw&quot;</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s2">&quot;band_lw&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="calc_ice_optics_yi">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_yi">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_yi</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute shortwave ice-particle scattering properties using Yi et al. (2013) parameterization.</span>
+
+<span class="sd">    From radiation_ice_optics_yi.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
+
+<span class="sd">    (C) Copyright 2017- ECMWF.</span>
+
+<span class="sd">    This software is licensed under the terms of the Apache Licence Version 2.0</span>
+<span class="sd">    which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.</span>
+
+<span class="sd">    In applying this licence, ECMWF does not waive the privileges and immunities</span>
+<span class="sd">    granted to it by virtue of its status as an intergovernmental organisation</span>
+<span class="sd">    nor does it submit to any jurisdiction.</span>
+
+<span class="sd">    | Authors:  Mark Fielding and Robin Hogan</span>
+<span class="sd">    | Email:   r.j.hogan@ecmwf.int</span>
+
+<span class="sd">    The reference for this ice optics parameterization is:</span>
+<span class="sd">    Yi, B., P. Yang, B.A. Baum, T. L&#39;Ecuyer, L. Oreopoulos, E.J. Mlawer, A.J. Heymsfield, and K. Liou, 2013:</span>
+<span class="sd">    Influence of Ice Particle Surface Roughening on the Global Cloud Radiative Effect. J. Atmos. Sci., 70, 2794–2807,</span>
+<span class="sd">    https://doi.org/10.1175/JAS-D-13-020.1</span>
+
+<span class="sd">    | Modifications:</span>
+<span class="sd">    |   2023-03-06  J. Röttenbacher  Translated to python3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bands: &#39;sw&#39; or &#39;lw&#39;, shortwave or longwave bands</span>
+<span class="sd">        ice_wp: Ice water path (kg m-2)</span>
+<span class="sd">        r_eff: effective radius (m)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        od: Total optical depth</span>
+<span class="sd">        scat_od: Scattering optical depth</span>
+<span class="sd">        g: Asymmetry factor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NSingleCoeffs</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="c1"># read in coefficients from netcdf file</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;pylim.data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+        <span class="s2">&quot;yi_ice_scattering_rrtm_new.nc&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>  <span class="c1"># number of bands</span>
+    <span class="n">lu_scale</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">lu_offset</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">coeff</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;coeff_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">1&quot;</span><span class="p">]</span>  <span class="c1"># Band-specific coefficients</span>
+    <span class="c1"># Convert to effective diameter using the relationship in the IFS</span>
+    <span class="c1"># de_um = r_eff * (1.0e6 / 0.64952)</span>
+    <span class="n">de_um</span> <span class="o">=</span> <span class="n">r_eff</span> <span class="o">*</span> <span class="mf">2.0e6</span>
+
+    <span class="c1"># limit de_um to validity of LUT</span>
+    <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">de_um</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">de_um</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">de_um</span> <span class="o">&lt;</span> <span class="mf">119.99</span><span class="p">))</span>
+    <span class="n">de_um</span> <span class="o">=</span> <span class="n">de_um</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="mf">119.99</span><span class="p">)</span>  <span class="c1"># avoid greater than or equal to 120 um</span>
+    <span class="n">replace_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">de_um</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">de_um</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">de_um</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">de_um</span> <span class="o">=</span> <span class="n">de_um</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">replace_values</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>  <span class="c1"># avoid smaller 20 um</span>
+
+    <span class="n">iwp_gm_2</span> <span class="o">=</span> <span class="n">ice_wp</span> <span class="o">*</span> <span class="mf">1000.0</span>  <span class="c1"># convert to g/m2</span>
+    <span class="n">lu_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">de_um</span> <span class="o">*</span> <span class="n">lu_scale</span> <span class="o">-</span> <span class="n">lu_offset</span><span class="p">)</span>  <span class="c1"># generate look up indices</span>
+    <span class="n">wts_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">de_um</span> <span class="o">*</span> <span class="n">lu_scale</span> <span class="o">-</span> <span class="n">lu_offset</span><span class="p">)</span> <span class="o">-</span> <span class="n">lu_idx</span>
+    <span class="n">wts_1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">wts_2</span>
+
+    <span class="n">od_list</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># define lists to append each band to</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">coeff</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># retrieve coefficients</span>
+        <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">,</span> <span class="n">c4</span><span class="p">,</span> <span class="n">c5</span><span class="p">,</span> <span class="n">c6</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">lu_idx</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># loop through coefficients</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">key</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># look up indices start at 1</span>
+            <span class="n">c1</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="c1"># use try and except to catch IndexError</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">c2</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">c3</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="n">NSingleCoeffs</span><span class="p">]</span>
+                <span class="n">c4</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="n">NSingleCoeffs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">c5</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">NSingleCoeffs</span><span class="p">]</span>
+                <span class="n">c6</span><span class="p">[</span><span class="n">lu_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">NSingleCoeffs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="n">od</span> <span class="o">=</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">iwp_gm_2</span> <span class="o">*</span> <span class="p">(</span><span class="n">wts_1</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">+</span> <span class="n">wts_2</span> <span class="o">*</span> <span class="n">c2</span><span class="p">)</span>
+        <span class="n">od_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">od</span><span class="p">)</span>
+        <span class="n">scat_od</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">od</span> <span class="o">*</span> <span class="p">(</span><span class="n">wts_1</span> <span class="o">*</span> <span class="n">c3</span> <span class="o">+</span> <span class="n">wts_2</span> <span class="o">*</span> <span class="n">c4</span><span class="p">))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wts_1</span> <span class="o">*</span> <span class="n">c5</span> <span class="o">+</span> <span class="n">wts_2</span> <span class="o">*</span> <span class="n">c6</span><span class="p">)</span>
+
+    <span class="n">od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">od_list</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">scat_od</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">scat_od</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;band_</span><span class="si">{</span><span class="n">bands</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
+
+
+
+<div class="viewcode-block" id="calc_pressure">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_pressure">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_pressure</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the pressure at half and full hybrid model level.</span>
+<span class="sd">    See https://confluence.ecmwf.int/display/CKB/ERA5%3A+compute+pressure+and+geopotential+on+model+levels%2C+geopotential+height+and+geometric+height</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: DataSet as provided from the IFS output</span>
+
+<span class="sd">    Returns: DataSet with pressure at half and full model level</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># calculate pressure at half and mid-level, this will add the single level for surface pressure to its dimension</span>
+    <span class="c1"># remove it by selecting only this level and dropping the coordinate, which is now not an index anymore</span>
+    <span class="n">ph</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hyai&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;lnsp&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">lev_2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">*</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hybi&quot;</span><span class="p">]</span>
+    <span class="c1"># pf = ds[&quot;hyam&quot;] + np.e ** ds[&quot;lnsp&quot;] * ds[&quot;hybm&quot;]</span>
+    <span class="c1"># use code as suggested by confluence article</span>
+    <span class="c1"># difference in the lowest levels &lt; 0.05 Pa (new - old)</span>
+    <span class="n">pf</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">hybrid</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ph</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">pf</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ph</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">nhyi</span><span class="o">=</span><span class="n">hybrid</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">ph</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">nhyi</span><span class="o">=</span><span class="n">hybrid</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">pf</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="s2">&quot;lev&quot;</span><span class="p">)</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;pressure_hl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ph</span>  <span class="c1"># assign as a new variable</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;pressure_full&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pf</span>
+
+    <span class="k">return</span> <span class="n">ds</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_pressure_height">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calculate_pressure_height">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_pressure_height</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the pressure height for the half and full model levels</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: Dataset with temperature and pressure on model half and full levels (``pressure_hl``, ``temperature_hl``,</span>
+<span class="sd">            ``pressure_full``, ``t``)</span>
+
+<span class="sd">    Returns: Dataset with two new variables ``press_height_hl`` and ``press_height_full`` in meters</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;half_level&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="c1"># ignore division by zero error</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+            <span class="n">press_height_hl</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
+                <span class="n">met</span><span class="o">.</span><span class="n">barometric_height</span><span class="p">,</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;pressure_hl&quot;</span><span class="p">],</span>
+                <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;temperature_hl&quot;</span><span class="p">],</span>
+                <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[</span>
+                    <span class="p">[</span><span class="s2">&quot;half_level&quot;</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;half_level&quot;</span><span class="p">],</span>
+                <span class="p">],</span>  <span class="c1"># list with one entry per arg</span>
+                <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;half_level&quot;</span><span class="p">]],</span>
+                <span class="c1"># list with one entry per arg</span>
+                <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># loop over non-core dims</span>
+                <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+                <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">temperature_hl</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_hl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">press_height_hl</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+            <span class="n">half_level</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">press_height_hl</span><span class="o">.</span><span class="n">half_level</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="c1"># replace nan (TOA) with 80km</span>
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_hl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_hl&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_hl&quot;</span><span class="p">]),</span> <span class="mi">80000</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Dimension &#39;half_level&#39; not found in data set!&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;level&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="c1"># calculate pressure height of model full levels</span>
+        <span class="n">press_height_full</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
+            <span class="n">met</span><span class="o">.</span><span class="n">barometric_height</span><span class="p">,</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;pressure_full&quot;</span><span class="p">],</span>
+            <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">],</span>
+            <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;level&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;level&quot;</span><span class="p">]],</span>  <span class="c1"># list with one entry per arg</span>
+            <span class="n">output_core_dims</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;level&quot;</span><span class="p">]],</span>
+            <span class="c1"># list with one entry per arg</span>
+            <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># loop over non-core dims</span>
+            <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+            <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_full&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">press_height_full</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">press_height_full</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="c1"># replace nan (TOA) with 80km</span>
+        <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_full&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_full&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;press_height_full&quot;</span><span class="p">]),</span> <span class="mi">80000</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Dimension &#39;level&#39; not found in data set!&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;half_level&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span> <span class="ow">and</span> <span class="s2">&quot;level&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Data set must have one of the dimensions &#39;half_level&#39; or &#39;level&#39;!&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ds</span></div>
+
+
+
+<div class="viewcode-block" id="apply_ice_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_ice_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_ice_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply ice effective radius function over a whole dataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: IFS DataSet</span>
+
+<span class="sd">    Returns: DataSet with new variable re_ice containing the ice effective radius for each point</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check if time, lat and lon are dimensions in data set and adjust chunking accordingly</span>
+    <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;level&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Input dimensions </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="si">}</span><span class="s2"> do not match any combination of expected dimensions&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">ieffr</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
+        <span class="n">ice_effective_radius</span><span class="p">,</span>  <span class="c1"># first the function</span>
+        <span class="c1"># now arguments in the order expected by &#39;ice_effective_radius&#39;</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">pressure_full</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>  <span class="c1"># as above</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">cloud_fraction</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">ciwc</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">cswc</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>  <span class="c1"># as above</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span>  <span class="c1"># list with one entry per arg</span>
+        <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># loop over non-core dims</span>
+        <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+        <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;re_ice&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ieffr</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;re_ice&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ds</span></div>
+
+
+
+<div class="viewcode-block" id="apply_liquid_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_liquid_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_liquid_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply liquid effective radius function over a whole dataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds: IFS DataSet</span>
+
+<span class="sd">    Returns: DataSet with new variable re_ice containing the ice effective radius for each point</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check if time, lat and lon are dimensions in data set and adjust chunking accordingly</span>
+    <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">chunk_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Input dimensions </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="si">}</span><span class="s2"> do not match any combination of expected dimensions&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">leffr</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">apply_ufunc</span><span class="p">(</span>
+        <span class="n">liquid_effective_radius</span><span class="p">,</span>  <span class="c1"># first the function</span>
+        <span class="c1"># now arguments in the order expected by &#39;liquid_effective_radius&#39;</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">pressure_full</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>  <span class="c1"># as above</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">cloud_fraction</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">clwc</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">crwc</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunk_dict</span><span class="p">),</span>
+        <span class="n">input_core_dims</span><span class="o">=</span><span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]],</span>  <span class="c1"># list with one entry per arg</span>
+        <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># loop over non-core dims</span>
+        <span class="n">dask</span><span class="o">=</span><span class="s2">&quot;parallelized&quot;</span><span class="p">,</span>
+        <span class="n">output_dtypes</span><span class="o">=</span><span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;re_liquid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">leffr</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+    <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;re_liquid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ds</span></div>
+
+
+
+<div class="viewcode-block" id="cloud_overlap_decorr_len">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.cloud_overlap_decorr_len">[docs]</a>
+<span class="k">def</span> <span class="nf">cloud_overlap_decorr_len</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the overlap decorrelation length parameter according to Shonk et al. 2010 (https://doi.org/10.1002/qj.647)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latitude: Latitude of IFS grid cell</span>
+<span class="sd">        scheme: Which scheme to apply?</span>
+
+<span class="sd">    Returns: decorr_len_edges_km, decorr_len_water_km, decorr_len_ratio</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># sin_lat = np.sin(latitude * np.pi / 180)</span>
+
+    <span class="k">if</span> <span class="n">scheme</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;nicht gut&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Use another value for scheme!&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">scheme</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># operational in IFS (Shonk et al. 2010, Part I)</span>
+        <span class="n">abs_lat_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+        <span class="n">decorr_len_edges_km</span> <span class="o">=</span> <span class="mf">2.899</span> <span class="o">-</span> <span class="mf">0.02759</span> <span class="o">*</span> <span class="n">abs_lat_deg</span>
+
+    <span class="k">elif</span> <span class="n">scheme</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>
+        <span class="n">decorr_len_edges_km</span> <span class="o">=</span> <span class="mf">0.75</span> <span class="o">+</span> <span class="mf">2.149</span> <span class="o">*</span> <span class="n">cos_lat</span> <span class="o">*</span> <span class="n">cos_lat</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong value for scheme: </span><span class="si">{</span><span class="n">scheme</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">decorr_len_water_km</span> <span class="o">=</span> <span class="n">decorr_len_edges_km</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="n">decorr_len_ratio</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="k">return</span> <span class="n">decorr_len_edges_km</span><span class="p">,</span> <span class="n">decorr_len_water_km</span><span class="p">,</span> <span class="n">decorr_len_ratio</span></div>
+
+
+
+<div class="viewcode-block" id="get_model_level_of_altitude">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.get_model_level_of_altitude">[docs]</a>
+<span class="k">def</span> <span class="nf">get_model_level_of_altitude</span><span class="p">(</span>
+    <span class="n">altitude</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">model_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the model levels corresponding to a time series of altitude values such as given by a flight path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        altitude: time series of altitude values in m, has to have the dimension time</span>
+<span class="sd">        model_ds: model data set with index time, level and/or half_level and variables press_height_hl and/or press_height_full</span>
+<span class="sd">        coord: which vertical coordinate to use for selection, either &quot;half_level&quot; or &quot;level&quot;</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="n">altitude</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">model_ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+    <span class="n">ts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_ds</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">height_level</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">coord</span> <span class="o">==</span> <span class="s2">&quot;half_level&quot;</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;press_height_hl&quot;</span>
+    <span class="k">elif</span> <span class="n">coord</span> <span class="o">==</span> <span class="s2">&quot;level&quot;</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;press_height_full&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;coord&#39; has to be either &#39;half_level&#39; or &#39;level&#39; but is &#39;</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">model_ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2"> should be two dimensional!&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; Remove dimension(s) </span><span class="si">{</span><span class="p">[</span><span class="n">d</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">model_ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">coord</span><span class="p">]]</span><span class="si">}</span><span class="s2"> from input!&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ts</span><span class="p">)):</span>
+        <span class="n">height_level</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">arg_nearest</span><span class="p">(</span>
+            <span class="n">model_ds</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">alt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="n">height_level</span> <span class="o">=</span> <span class="n">height_level</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">height_level_da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+        <span class="n">height_level</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">model_ds</span><span class="o">.</span><span class="n">time</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">height_level_da</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-, Radiation Group LIM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

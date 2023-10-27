@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pylim.libradtran &mdash; pylim 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pylim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.libradtran</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pylim.libradtran</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Functions to process and plot libRadtran simulation files</span>
+
+<span class="sd">*author*: Johannes Röttenbacher</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">geopy.distance</span> <span class="kn">import</span> <span class="n">geodesic</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">cpu_count</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="c1"># %% module import</span>
+<span class="kn">from</span> <span class="nn">pylim.cirrus_hl</span> <span class="kn">import</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">radiosonde_stations</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_netcdf_global_attributes">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_global_attributes">[docs]</a>
+<span class="k">def</span> <span class="nf">get_netcdf_global_attributes</span><span class="p">(</span><span class="n">campaign</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flight</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary with globa attributes for a libRadtran simulation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        campaign: which campaign (cirrus-hl, halo-ac3)</span>
+<span class="sd">        flight: which flight</span>
+<span class="sd">        experiment: which experiment has been run</span>
+
+<span class="sd">    Returns: dictionary with global attributes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">global_attributes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cirrus-hl&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Simulated downward and upward irradiance along flight track for experiment </span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">Conventions</span><span class="o">=</span><span class="s2">&quot;CF-1.9&quot;</span><span class="p">,</span>
+            <span class="n">camapign_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">campaign</span><span class="o">.</span><span class="n">swapcase</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">platform_id</span><span class="o">=</span><span class="s2">&quot;HALO&quot;</span><span class="p">,</span>
+            <span class="n">version_id</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;CIRRUS-HL Campaign, Oberpfaffenhofen, Germany, </span><span class="si">{</span><span class="n">flight</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">contact</span><span class="o">=</span><span class="s2">&quot;PI: m.wendisch@uni-leipzig.de, Data: johannes.roettenbacher@uni-leipzig.de&quot;</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
+            <span class="n">institution</span><span class="o">=</span><span class="s2">&quot;Leipzig Institute for Meteorology, Leipzig University, Stephanstr.3, 04103 Leipzig, Germany&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;libRadtran 2.0.4&quot;</span><span class="p">,</span>
+            <span class="n">references</span><span class="o">=</span><span class="s2">&quot;Emde et al. 2016, 10.5194/gmd-9-1647-2016&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;halo-ac3&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Simulated downward and upward irradiance along flight track for experiment </span><span class="si">{</span><span class="n">experiment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">Conventions</span><span class="o">=</span><span class="s2">&quot;CF-1.9&quot;</span><span class="p">,</span>
+            <span class="n">campaign_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">campaign</span><span class="o">.</span><span class="n">swapcase</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">platform_id</span><span class="o">=</span><span class="s2">&quot;HALO&quot;</span><span class="p">,</span>
+            <span class="n">version_id</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="n">institution</span><span class="o">=</span><span class="s2">&quot;Leipzig Institute for Meteorology, Leipzig, Germany, Stephanstr.3, 04103 Leipzig, Germany&quot;</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
+            <span class="n">contact</span><span class="o">=</span><span class="s2">&quot;Johannes Röttenbacher, johannes.roettenbacher@uni-leipzig.de&quot;</span><span class="p">,</span>
+            <span class="n">PI</span><span class="o">=</span><span class="s2">&quot;André Ehrlich, a.ehrlich@uni-leipzig.de&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;libRadtran 2.0.4&quot;</span><span class="p">,</span>
+            <span class="n">references</span><span class="o">=</span><span class="s2">&quot;Emde et al. 2016, 10.5194/gmd-9-1647-2016&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">global_attributes</span><span class="p">[</span><span class="n">campaign</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_netcdf_variable_attributes">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_variable_attributes">[docs]</a>
+<span class="k">def</span> <span class="nf">get_netcdf_variable_attributes</span><span class="p">(</span>
+    <span class="n">solar_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">integrate_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wavelength_str</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary with variable attributes for a libRadtran simulation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        solar_flag: whether the simulation was a solar or a terrestrial simulation</span>
+<span class="sd">        integrate_str: whether the simulations was integrated at the end or not</span>
+<span class="sd">        wavelength_str: wavelength range of the simulation</span>
+
+<span class="sd">    Returns: dictionary with variable attributes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># set up metadata for general variables which are shared between solar and terrestrial simulations</span>
+    <span class="n">general_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">latitude</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_north&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;latitude&quot;</span>
+        <span class="p">),</span>
+        <span class="n">longitude</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_east&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span>
+        <span class="p">),</span>
+        <span class="n">saa</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;solar azimuth angle&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;soalr_azimuth_angle&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;clockwise from north&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">sza</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;solar zenith angle&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;solar_zenith_angle&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;0 deg = zenith&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">CLWD</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;g m^-3&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;cloud liquid water density&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;mass_concentration_of_cloud_liquid_water_in_air&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">CIWD</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;g m^-3&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;cloud ice water density&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;mass_concentration_of_cloud_ice_water_in_air&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">p</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;hPa&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;atmospheric pressure&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;air_pressure&quot;</span>
+        <span class="p">),</span>
+        <span class="n">T</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;air temperature&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;air_temperature&quot;</span><span class="p">),</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;nm&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;wavelength&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;radiation_wavelength&quot;</span>
+        <span class="p">),</span>
+        <span class="n">re_ice</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;mum&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;input ice effective radius&quot;</span><span class="p">),</span>
+        <span class="n">iwc</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;g m^-3&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;input ice water content&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># set up metadata dictionaries for solar (shortwave) flux</span>
+    <span class="n">solar_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">albedo</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;surface albedo&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;surface_albedo&quot;</span>
+        <span class="p">),</span>
+        <span class="n">altitude</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;height above mean sea level&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;altitude&quot;</span>
+        <span class="p">),</span>
+        <span class="n">direct_fraction</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;direct fraction of downward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">edir</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">direct beam irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;direct_downwelling_shortwave_flux_in_air&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">edn</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">diffuse downward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;diffuse_downwelling_shortwave_flux_in_air_assuming_clear_sky&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">eup</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">diffuse upward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;surface_upwelling_shortwave_flux_in_air_assuming_clear_sky&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">eglo</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">global solar downward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;solar_irradiance&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">enet</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">net irradiance&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">heat</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;K day-1&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;heating rate&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># set up metadata dictionaries for terrestrial (longwave) flux</span>
+    <span class="n">terrrestrial_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">albedo</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;surface albedo&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;surface_albedo&quot;</span>
+        <span class="p">),</span>
+        <span class="n">altitude</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;height above mean sea level&quot;</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;altitude&quot;</span>
+        <span class="p">),</span>
+        <span class="n">direct_fraction</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="s2">&quot;direct fraction of downward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">edir</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">direct beam irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;direct_downwelling_longwave_flux_in_air&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">edn</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">downward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;downwelling_longwave_flux_in_air_assuming_clear_sky&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">eup</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;W m-2&quot;</span><span class="p">,</span>
+            <span class="n">long_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integrate_str</span><span class="si">}</span><span class="s2">upward irradiance&quot;</span><span class="p">,</span>
+            <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;surface_upwelling_longwave_flux_in_air_assuming_clear_sky&quot;</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">wavelength_str</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">solar_flag</span><span class="p">:</span>
+        <span class="n">attributes_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">general_variables</span><span class="p">,</span> <span class="o">**</span><span class="n">solar_variables</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attributes_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">general_variables</span><span class="p">,</span> <span class="o">**</span><span class="n">terrrestrial_variables</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">attributes_dict</span></div>
+
+
+
+<div class="viewcode-block" id="find_closest_radiosonde_station">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.find_closest_radiosonde_station">[docs]</a>
+<span class="k">def</span> <span class="nf">find_closest_radiosonde_station</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given longitude and latitude, find the closest radiosonde station from the campaign dictionary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latitude: in decimal degrees (N=positive)</span>
+<span class="sd">        longitude: in decimal degrees (E=positive)</span>
+
+<span class="sd">    Returns: Name of the closest radiosonde station</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">station_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">station</span><span class="p">[:</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">radiosonde_stations</span>
+    <span class="p">]</span>  <span class="c1"># read out station names from list</span>
+    <span class="c1"># loop through stations and save distance in km</span>
+    <span class="k">for</span> <span class="n">station_name</span> <span class="ow">in</span> <span class="n">station_names</span><span class="p">:</span>
+        <span class="n">lon_lat</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">station_name</span><span class="p">]</span>
+        <span class="n">distances</span><span class="p">[</span><span class="n">station_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">geodesic</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">lon_lat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lon_lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">km</span>
+
+    <span class="n">min_distance</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># get minimum distance</span>
+    <span class="n">closest_station</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">station_names</span> <span class="k">if</span> <span class="n">distances</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">==</span> <span class="n">min_distance</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">closest_station</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">radiosonde_stations</span> <span class="k">if</span> <span class="n">closest_station</span> <span class="ow">in</span> <span class="n">s</span><span class="p">][</span>
+        <span class="mi">0</span>
+    <span class="p">]</span>  <span class="c1"># get complete station name</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Closest Radiosonde station </span><span class="si">{</span><span class="n">closest_station</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">min_distance</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> km away.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">closest_station</span></div>
+
+
+
+<div class="viewcode-block" id="get_info_from_libradtran_input">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_info_from_libradtran_input">[docs]</a>
+<span class="k">def</span> <span class="nf">get_info_from_libradtran_input</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Open a libRadtran input file and read out some information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: path to file</span>
+
+<span class="sd">    Returns: Some variables (latitude, longitude, time, header of output file, wavelength range, integrate flag)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># define all possible output values</span>
+    <span class="n">output_values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_stamp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;header&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;wavelengths&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;integrate_flag&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;zout&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;experiment_settings&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">output_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ifile</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?P&lt;direction&gt;[NS]) (?P&lt;value&gt;[0-9]+\.?[0-9]*)&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;direction&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">:</span>
+                <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="k">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;direction&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span>
+                <span class="p">),</span> <span class="s2">&quot;Direction is not &#39;N&#39; or &#39;S&#39;! Check input&quot;</span>
+                <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(?P&lt;direction&gt;[EW]) (?P&lt;value&gt;[0-9]+\.?[0-9]*)&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;direction&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span>
+                <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="k">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;direction&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;W&quot;</span>
+                <span class="p">),</span> <span class="s2">&quot;Direction is not &#39;W&#39; or &#39;E&#39;! Check input&quot;</span>
+                <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;time_stamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+                <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%Y %m </span><span class="si">%d</span><span class="s2"> %H %M %S&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;output_user&quot;</span><span class="p">):</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;wavelength&quot;</span><span class="p">):</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;wavelengths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">11</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;output_process&quot;</span><span class="p">):</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;integrate_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">True</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;integrate&quot;</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;zout&quot;</span><span class="p">):</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;zout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;# Experiment&quot;</span><span class="p">):</span>
+            <span class="c1"># read out experimental values from input file, split line at : or , and strip of whitespace</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[:,]&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+            <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">experiment_settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="n">experiment_settings</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;experiment_settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment_settings</span>
+
+        <span class="c1"># set output to None if not available in input file</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">output_values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output_dict</span><span class="p">:</span>
+                <span class="n">output_dict</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># integrate flag can be unset in input file and is set to False</span>
+        <span class="k">if</span> <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;integrate_flag&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_dict</span><span class="p">[</span><span class="s2">&quot;integrate_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">output_dict</span></div>
+
+
+
+<div class="viewcode-block" id="run_uvspec_parallel">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.run_uvspec_parallel">[docs]</a>
+<span class="k">def</span> <span class="nf">run_uvspec_parallel</span><span class="p">(</span><span class="n">input_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">uvspec_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run libRadtran simulations for all input files in parallel and check if an output has been created.</span>
+<span class="sd">    Rerun the failed simulations a couple of times before quitting.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_files: list with full paths to each input file</span>
+<span class="sd">        uvspec_exe: path to uvspec executable</span>
+
+<span class="sd">    Returns: Writes output and log files in directory of the input files</span>
+
+<span class="sd">    Raises: UsesWarning if a simulation fails more than 10 times</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># create output and log file names</span>
+    <span class="n">output_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.inp&quot;</span><span class="p">,</span> <span class="s2">&quot;.out&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">input_files</span><span class="p">]</span>
+    <span class="n">error_logs</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.inp&quot;</span><span class="p">,</span> <span class="s2">&quot;.log&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">input_files</span><span class="p">]</span>
+
+    <span class="c1"># call uvspec for all files</span>
+    <span class="n">processes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">max_processes</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">4</span>
+    <span class="n">tqdm_desc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;libRadtran simulations&quot;</span>
+    <span class="k">for</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">log_file</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">tqdm</span><span class="p">(</span><span class="n">input_files</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">tqdm_desc</span><span class="p">),</span> <span class="n">output_files</span><span class="p">,</span> <span class="n">error_logs</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ifile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ofile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span>
+            <span class="n">log_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">lfile</span><span class="p">:</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Popen</span><span class="p">([</span><span class="n">uvspec_exe</span><span class="p">],</span> <span class="n">stdin</span><span class="o">=</span><span class="n">ifile</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">ofile</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">lfile</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">max_processes</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">difference_update</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="c1"># wait for all simulations to finish</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="c1"># this will remove elements of the set which are also in the list.</span>
+        <span class="c1"># the list has only terminated processes in it,</span>
+        <span class="c1"># p.poll returns a non None value if the process is still running</span>
+        <span class="n">processes</span><span class="o">.</span><span class="n">difference_update</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+
+    <span class="c1"># check if all simulations created an output and rerun them if not</span>
+    <span class="n">file_check</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">output_files</span><span class="p">])</span>
+    <span class="c1"># if file size is 0 -&gt; file is empty</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># add a counter to terminate loop if necessary</span>
+    <span class="k">while</span> <span class="n">file_check</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">files_to_rerun</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">input_files</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.inp&quot;</span><span class="p">,</span> <span class="s2">&quot;.out&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">]</span>
+        <span class="c1"># rerun simulations</span>
+        <span class="k">for</span> <span class="n">infile</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">files_to_rerun</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;redo libRadtran simulations&quot;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ifile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.inp&quot;</span><span class="p">,</span> <span class="s2">&quot;.out&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">ofile</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">infile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.inp&quot;</span><span class="p">,</span> <span class="s2">&quot;.log&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">lfile</span><span class="p">:</span>
+                <span class="n">processes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                    <span class="n">Popen</span><span class="p">([</span><span class="n">uvspec_exe</span><span class="p">],</span> <span class="n">stdin</span><span class="o">=</span><span class="n">ifile</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">ofile</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">lfile</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">max_processes</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+                <span class="n">processes</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="p">)</span>
+
+        <span class="c1"># wait for all simulations to finish</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># this will remove elements of the set which are also in the list.</span>
+            <span class="c1"># the list has only terminated processes in it,</span>
+            <span class="c1"># p.poll returns a non None value if the process is still running</span>
+            <span class="n">processes</span><span class="o">.</span><span class="n">difference_update</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processes</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="c1"># update file_check</span>
+        <span class="n">file_check</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">output_files</span><span class="p">])</span>
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Simulation of </span><span class="si">{</span><span class="n">files_to_rerun</span><span class="si">}</span><span class="s2"> does not compute!</span><span class="se">\n</span><span class="s2">Check for other errors!&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-, Radiation Group LIM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

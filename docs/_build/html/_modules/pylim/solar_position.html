@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pylim.solar_position &mdash; pylim 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pylim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.solar_position</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pylim.solar_position</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Functions calculating the solar position</span>
+
+<span class="sd">**author:** Hanno Müller, Johannes Röttenbacher</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="dec">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.dec">[docs]</a>
+<span class="k">def</span> <span class="nf">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Declination calculated after Michalsky, J.  1988.</span>
+<span class="sd">    **Reference**: Michalsky, J.  1988. The Astronomical Almanac&#39;s algorithm for approximate solar position (1950-2050). Solar Energy 40 (3), pp. 227-235.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        julian: julian day (day of year) as calculated with julian2.pro</span>
+<span class="sd">        year: The year (e.g., 2020)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        declination in (deg)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; dec(303, 2020)</span>
+<span class="sd">        -13.52916587749051</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+
+    <span class="c1"># get the current julian date (actually add 2,400,000 for jd)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">year</span> <span class="o">-</span> <span class="mf">1949.0</span>
+    <span class="n">leap</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">julian_zero</span> <span class="o">=</span> <span class="mf">32916.5</span> <span class="o">+</span> <span class="n">delta</span> <span class="o">*</span> <span class="mf">365.0</span> <span class="o">+</span> <span class="n">leap</span> <span class="o">+</span> <span class="n">julian</span>
+    <span class="c1"># 1st no. is mid. 0 jan 1949 minus 2.4e6 leap=leap days since 1949</span>
+    <span class="c1"># the last yr of century is not leap yr unless divisible by 400</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">year</span> <span class="o">%</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="n">year</span> <span class="o">%</span> <span class="mf">400.0</span><span class="p">)</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">):</span>
+        <span class="n">julian_zero</span> <span class="o">=</span> <span class="n">julian_zero</span> <span class="o">-</span> <span class="mf">1.0</span>
+
+    <span class="c1"># calculate ecliptic coordinates</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">julian_zero</span> <span class="o">-</span> <span class="mf">51545.0</span>
+
+    <span class="c1"># force mean longitude between 0 and 360 degs</span>
+    <span class="n">mnlong</span> <span class="o">=</span> <span class="mf">280.460</span> <span class="o">+</span> <span class="mf">0.9856474</span> <span class="o">*</span> <span class="n">time</span>
+    <span class="n">mnlong</span> <span class="o">=</span> <span class="n">mnlong</span> <span class="o">%</span> <span class="mf">360.0</span>
+    <span class="k">if</span> <span class="n">mnlong</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">mnlong</span> <span class="o">=</span> <span class="n">mnlong</span> <span class="o">+</span> <span class="mf">360.0</span>
+
+    <span class="c1"># mean anomaly in radians between 0 and 2*pi</span>
+    <span class="n">mnanom</span> <span class="o">=</span> <span class="mf">357.528</span> <span class="o">+</span> <span class="mf">0.9856003</span> <span class="o">*</span> <span class="n">time</span>
+    <span class="n">mnanom</span> <span class="o">=</span> <span class="n">mnanom</span> <span class="o">%</span> <span class="mf">360.0</span>
+    <span class="k">if</span> <span class="n">mnanom</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">mnanom</span> <span class="o">=</span> <span class="n">mnanom</span> <span class="o">+</span> <span class="mf">360.0</span>
+    <span class="n">mnanom</span> <span class="o">=</span> <span class="n">mnanom</span> <span class="o">*</span> <span class="n">rad</span>
+
+    <span class="c1"># compute the ecliptic longitude and obliquity of ecliptic in radians</span>
+    <span class="n">eclong</span> <span class="o">=</span> <span class="n">mnlong</span> <span class="o">+</span> <span class="mf">1.915</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">mnanom</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.020</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">mnanom</span><span class="p">)</span>
+    <span class="n">eclong</span> <span class="o">=</span> <span class="n">eclong</span> <span class="o">%</span> <span class="mf">360.0</span>
+    <span class="k">if</span> <span class="n">eclong</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">eclong</span> <span class="o">=</span> <span class="n">eclong</span> <span class="o">+</span> <span class="mf">360.0</span>
+    <span class="n">oblqec</span> <span class="o">=</span> <span class="mf">23.439</span> <span class="o">-</span> <span class="mf">0.0000004</span> <span class="o">*</span> <span class="n">time</span>
+    <span class="n">eclong</span> <span class="o">=</span> <span class="n">eclong</span> <span class="o">*</span> <span class="n">rad</span>
+    <span class="n">oblqec</span> <span class="o">=</span> <span class="n">oblqec</span> <span class="o">*</span> <span class="n">rad</span>
+
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">oblqec</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">eclong</span><span class="p">))</span> <span class="o">/</span> <span class="n">rad</span>
+
+    <span class="k">return</span> <span class="n">dec</span></div>
+
+
+
+<div class="viewcode-block" id="get_saa">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_saa">[docs]</a>
+<span class="k">def</span> <span class="nf">get_saa</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the solar azimuth angles.</span>
+<span class="sd">    Requires function julian_day,local_time,dec</span>
+<span class="sd">    Args:</span>
+<span class="sd">        t0: Time in UTC (in decimal hours, i.e. 10.5 for 10h30min)</span>
+<span class="sd">        lat: Latitude (North positive)</span>
+<span class="sd">        lon: Longitude (East positive)</span>
+<span class="sd">        year: The year  (e.g. 2020)</span>
+<span class="sd">        month: The month (1-12)</span>
+<span class="sd">        day: The day (1-31)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The solar azimuth angle (deg)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; azimuth = get_saa(11, 51.34, 12.376, 2022, 2, 2)</span>
+<span class="sd">        &gt;&gt;&gt; azimuth</span>
+<span class="sd">        173.75177751099122</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">julian</span> <span class="o">=</span> <span class="n">julian_day</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+    <span class="n">t_loc</span> <span class="o">=</span> <span class="n">local_time</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.0</span> <span class="o">-</span> <span class="n">t_loc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">15.0</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">))</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">))</span>
+    <span class="c1"># check that the azimuth is below else set it to 1</span>
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="n">azimuth</span> <span class="k">if</span> <span class="n">azimuth</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">azimuth</span><span class="p">)</span>
+    <span class="c1"># check if it is before local noon, if yes switch sign of azimuth</span>
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="n">azimuth</span> <span class="k">if</span> <span class="n">t_loc</span> <span class="o">&gt;</span> <span class="mi">12</span> <span class="k">else</span> <span class="o">-</span><span class="n">azimuth</span>
+    <span class="c1"># tl12 = np.where(t_loc &lt; 12.)</span>
+    <span class="c1"># if len(tl12[0]) &gt; 0: azimuth[tl12[0]] = -azimuth[tl12[0]]</span>
+    <span class="n">azimuth</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="n">azimuth</span> <span class="o">=</span> <span class="n">azimuth</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">return</span> <span class="n">azimuth</span></div>
+
+
+
+<div class="viewcode-block" id="get_sza">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_sza">[docs]</a>
+<span class="k">def</span> <span class="nf">get_sza</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the solar zenith angle</span>
+<span class="sd">    Requires function julian_day,local_time,dec,refract</span>
+
+<span class="sd">    Copyright by Sebastian Schmidt</span>
+
+<span class="sd">    changes by Andre Ehrlich:</span>
+<span class="sd">    - new declination parametrization after Michalsky, J.  1988. The Astronomical Almanac&#39;s algorithm for approximate solar position (1950-2050).  Solar Energy 40 (3), pp. 227-235.</span>
+<span class="sd">    - refraction correction algorithm from Meeus,1991</span>
+<span class="sd">    - check: for SZA &gt;95 no refraction correction</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        t0: Time in UTC (in decimal hours, i.e. 10.5 for 10h30min)</span>
+<span class="sd">        lat: Latitude (North positive)</span>
+<span class="sd">        lon: Longitude (East positive)</span>
+<span class="sd">        year: The year  (e.g. 2020)</span>
+<span class="sd">        month: The month (1-12)</span>
+<span class="sd">        day: The day (1-31)</span>
+<span class="sd">        pres: Surface Pressure in hPa (for refraction correction)</span>
+<span class="sd">        temp: Surface Temperature in deg C (for refraction correction)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The solar zenith angle (deg)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">julian</span> <span class="o">=</span> <span class="n">julian_day</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+    <span class="n">t_loc</span> <span class="o">=</span> <span class="n">local_time</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.0</span> <span class="o">-</span> <span class="n">t_loc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">15.0</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="o">*</span> <span class="n">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="c1"># correction for refraction</span>
+    <span class="c1"># refcor = fltarr(n_elements(height))</span>
+    <span class="n">refcor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="n">h1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">height</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">0.087</span><span class="p">)</span>  <span class="c1"># corrects only for angles &gt; -5deg</span>
+    <span class="c1"># if len(h1[0]) &gt; 0: refcor[h1[0]]=refract(height[h1[0]],pres,temp)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">h1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">refcor</span> <span class="o">=</span> <span class="n">refract</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">refcor</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">sza</span> <span class="o">=</span> <span class="mf">90.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">height</span> <span class="o">+</span> <span class="n">refcor</span><span class="p">)</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">return</span> <span class="n">sza</span></div>
+
+
+
+<div class="viewcode-block" id="julian_day">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.julian_day">[docs]</a>
+<span class="k">def</span> <span class="nf">julian_day</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the day of the year (julian_day) for a given date. Jan 1 = 1, Feb 1 = 32 etc.</span>
+<span class="sd">    Considers leap years and the time of day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        year: The year (e.g. 2020)</span>
+<span class="sd">        month: The month (1-12)</span>
+<span class="sd">        day: The day (1-31)</span>
+<span class="sd">        t0: Time in UTC (dezimal hours)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A value between 1 and 366, corresponding to the day of the year of year/month/day.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; jd = julian_day(2020, 2, 14, 6.8)</span>
+<span class="sd">        &gt;&gt;&gt; jd</span>
+<span class="sd">        45.28333333333333</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">)</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">)</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+    <span class="c1"># leap year -&gt; s=1:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">year</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">year</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">year</span> <span class="o">%</span> <span class="mi">400</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span>
+    <span class="k">if</span> <span class="n">month</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">jd</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">28</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">31</span> <span class="o">+</span> <span class="mi">30</span>
+    <span class="c1">#                      J  (F+s)M  A  M  J  J  A  S  O  N</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">jd</span> <span class="o">+</span> <span class="n">t0</span> <span class="o">/</span> <span class="mf">24.0</span>
+    <span class="p">)</span>  <span class="c1"># consider time of day (important for the hourly change of declination which can be large in spring/autumn)</span>
+
+    <span class="k">return</span> <span class="n">jd</span></div>
+
+
+
+<div class="viewcode-block" id="local_time">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.local_time">[docs]</a>
+<span class="k">def</span> <span class="nf">local_time</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the local solar time by accounting for</span>
+<span class="sd">    - longitude</span>
+<span class="sd">    - time equation (two versions are implemented, one commented, both are almost identical)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        julian: julian day (day of year) as calculated with julian2.pro</span>
+<span class="sd">        t0: Time in UTC (in decimal hours, i.e. 10.5 for 10h30min)</span>
+<span class="sd">        lon: Longitude (East positive)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Local solar time (in decimal hours, i.e. 10.5 for 10h30min)</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; solar_local_time = local_time(265, 5.2, 14)</span>
+<span class="sd">        &gt;&gt;&gt; solar_local_time</span>
+<span class="sd">        6.2521447402113886</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mean_local_time_min</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">+</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">lon</span>
+    <span class="n">fac</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.0132</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="o">+</span> <span class="mf">7.3525</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">julian</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">+</span> <span class="mf">1.4989</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">9.9359</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">julian</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">+</span> <span class="mf">1.9006</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">0.3387</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">julian</span> <span class="o">/</span> <span class="mf">365.0</span> <span class="o">+</span> <span class="mf">1.8360</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">corrected_local_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean_local_time_min</span> <span class="o">+</span> <span class="n">fac</span><span class="p">)</span> <span class="o">/</span> <span class="mf">60.0</span>
+
+    <span class="k">return</span> <span class="n">corrected_local_time</span></div>
+
+
+
+<div class="viewcode-block" id="refract">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.refract">[docs]</a>
+<span class="k">def</span> <span class="nf">refract</span><span class="p">(</span><span class="n">elv</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Correction of the solar elevation angle for refraction</span>
+<span class="sd">    **Reference**: J.Meeus, Astronomical Algorithms, 1991, pp102</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        elv: solar elevation (rad)</span>
+<span class="sd">        pres: station pressure (hPa)</span>
+<span class="sd">        temp: station temperature (°C)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Refraction correction offset (rad) which needs to be applied after-wards: corrected_elv = elv + refcor</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; refcor = refract(0.6, 850, 5)</span>
+<span class="sd">        &gt;&gt;&gt; refcor</span>
+<span class="sd">        0.0003679487426608174</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">elv</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">180.0</span>
+    <span class="n">refcor</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">1.02</span>
+        <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">((</span><span class="n">h</span> <span class="o">+</span> <span class="mf">10.3</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">+</span> <span class="mf">5.11</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">360.0</span><span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="n">pres</span> <span class="o">/</span> <span class="mf">1010.0</span><span class="p">)</span>
+        <span class="o">*</span> <span class="mf">283.0</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mf">273.0</span> <span class="o">+</span> <span class="n">temp</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">refcor</span> <span class="o">=</span> <span class="n">refcor</span> <span class="o">/</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+
+    <span class="k">return</span> <span class="n">refcor</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-, Radiation Group LIM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
