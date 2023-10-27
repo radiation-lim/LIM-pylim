@@ -17,7 +17,7 @@ def relative_humidity_water_to_relative_humidity_ice(
 ):
     """
     Convert the relative humidity over water to relative humidity over ice using either the formulas by
-    :cite:t:`Huang2018` or by :cite:t:`Alduchov1996`.
+    :cite:t:`huang2018` or by :cite:t:`alduchov1996`.
 
     .. math::
 
