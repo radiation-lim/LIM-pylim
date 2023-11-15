@@ -9,6 +9,9 @@ joblib
 pysolar
 geopy
 cmasher
+importlib_resources
+cartopy
+holoviews
 
 [dev]
 black
@@ -16,3 +19,7 @@ bumpver
 isort
 pip-tools
 pytest
+sphinx
+sphinx_rtd_theme
+sphinxcontrib.bibtex
+sphinx-copybutton

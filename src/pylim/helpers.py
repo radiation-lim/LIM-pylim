@@ -3,19 +3,18 @@
 
 *author*: Johannes Röttenbacher
 """
-import datetime
-import logging
 import os
 import shutil
 import sys
 from itertools import groupby
-
-import cmasher as cmr
+import toml
+import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
-import toml
 from matplotlib import colors
+import datetime
+import logging
+import cmasher as cmr
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -68,6 +67,7 @@ plot_units = dict(cloud_fraction="", clwc=r"mg$\,$kg$^{-1}$", ciwc=r"mg$\,$kg$^{
                   crwc=r"mg$\,$kg$^{-1}$", t="K", q=r"g$\,$kg$^{-1}$", re_ice=r"$\mu$m", re_liquid=r"$\mu$m",
                   heating_rate_sw=r"K$\,$day$^{-1}$", heating_rate_lw=r"K$\,$day$^{-1}$",
                   heating_rate_net=r"K$\,$day$^{-1}$",
+                  o3_mmr=r"kg$\,$kg$^{-1}$",
                   flux_dn_sw=r"W$\,$m$^{-2}$", flux_dn_lw=r"W$\,$m$^{-2}$", flux_up_sw=r"W$\,$m$^{-2}$",
                   flux_up_lw=r"W$\,$m$^{-2}$",
                   cre_sw=r"W$\,$m$^{-2}$", cre_lw=r"W$\,$m$^{-2}$", cre_total=r"W$\,$m$^{-2}$",
@@ -80,7 +80,7 @@ plot_units = dict(cloud_fraction="", clwc=r"mg$\,$kg$^{-1}$", ciwc=r"mg$\,$kg$^{
 cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water content", ciwc="Cloud ice water content",
                   cswc="Cloud snow water content", crwc="Cloud rain water content", t="Temperature",
                   q="Specific humidity", q_ice="Ice mass mixing ratio", q_liquid="Liquid mass mixing ratio",
-                  iwp="Ice water path", iwc="Ice water content",
+                  iwp="Ice water path", iwc="Ice water content", o3_mmr="Ozone mass mixing ratio",
                   re_ice="Ice effective radius", re_liquid="Liquid effective radius",
                   heating_rate_sw="Solar heating rate", heating_rate_lw="Terrestrial heating rate",
                   heating_rate_net="Net heating rate",
@@ -123,6 +123,25 @@ bacardi_labels = dict(F_down_solar=r"$F_{\downarrow, solar}$", F_down_terrestria
                       F_net_solar=r"$F_{net, solar}$", F_net_terrestrial=r"$F_{net, terrestrial}$",
                       CRE_solar=r"CRE$_{solar}$", CRE_terrestrial=r"CRE$_{terrestrial}$",
                       CRE_total=r"CRE$_{total}$")
+
+cb_color_cycles = dict(
+    cartocolor=["#88CCEE", "#CC6677", "#DDCC77", "#332288", "#AA4499", "#44AA99", "#999933",
+                "#882255", "#661100", "#6699CC", "#117733", "#888888"],
+    # orange, skyblue, bluishgreen, yellow, blue, vermillion, reddishpurple, gray, black
+    okabe_ito=["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
+               "#CC79A7", "#999999", "#000000"],
+    petroff_6=["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"],
+    petroff_8=["#1845fb", "#ff5e02", "#c91f16", "#c849a9", "#adad7d", "#86c8dd", "#578dff", "#656364"],
+    petroff_10=["#3f90da", "#ffa90e", "#bd1f01", "#94a4a2", "#832db6", "#a96b59", "#e76300",
+                "#b9ac70", "#717581", "#92dadd"])
+"""
+Colorblind friendly color cycles from the `rcartocolor <https://github.com/Nowosad/rcartocolor>`_ package,
+the Okabe-Ito palette :cite:p:`zotero-1251` and the survey from :cite:t:`petroff2021`
+
+.. image:: ./figures/cb_color_cycles.png
+    :alt: Image of the colors
+"""
+
 
 def get_path(key: str, flight: str = None, campaign: str = "cirrus-hl", instrument: str = None) -> str:
     """
@@ -348,25 +367,37 @@ def set_yticks_and_ylabels(ax: plt.axis, time_extend: datetime.timedelta) -> plt
     return ax
 
 
-def set_cb_friendly_colors():
-    """Set new colorblind friendly color cycle.
+def set_cb_friendly_colors(name: str = "cartocolor"):
+    """
+    Set new colorblind friendly color cycle.
+
+    Args:
+        name: Name of color cycle
 
     Returns: Modifies the standard pyplot color cycle
 
     """
-    cb_color_cycle = ["#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499", "#44AA99", "#999933", "#882255",
-                      "#661100", "#6699CC", "#888888"]
-    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=cb_color_cycle)
+    try:
+        new_color_cycle = cb_color_cycles[name]
+    except KeyError:
+        raise KeyError(f"No color cycle with name '{name}' found! "
+                       f"Use one of {cb_color_cycles.keys()}")
+    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=new_color_cycle)
 
 
-def get_cb_friendly_colors():
-    """Get colorblind friendly color cycle.
+def get_cb_friendly_colors(name: str = "cartocolor") -> list:
+    """
+    Get colorblind friendly color cycle.
+
+    Args:
+        name: Name of color cycle
 
     Returns: List with colorblind friendly colors
 
     """
-    return ["#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499", "#44AA99", "#999933", "#882255",
-            "#661100", "#6699CC", "#888888"]
+
+    return cb_color_cycles.get(name, f"No color cycle with name '{name}' found! "
+                                     f"Use one of {cb_color_cycles.keys()}")
 
 
 def nested_dict_values_iterator(dict_obj: dict):
@@ -570,7 +601,7 @@ def longitude_values_for_gaussian_grid(latitudes: np.array,
     lon_values_out = np.array([])
     lon_values_list = list()
     for i, lons in enumerate(lon_values):
-        all_lons = np.where(lons > 180, (lons+180)%360 - 180, lons)
+        all_lons = np.where(lons > 180, (lons + 180) % 360 - 180, lons)
         assert len(all_lons) == len(np.unique(all_lons)), f"Non unique longitude values found for {i}! Check input!"
         if longitude_boundaries is not None:
             all_lons = all_lons[(all_lons >= longitude_boundaries[0]) & (all_lons <= longitude_boundaries[1])]
@@ -605,7 +636,7 @@ def hellinger_distance(p, q):
     assert p.shape == q.shape, "Input distributions must have the same shape."
 
     # Calculate the Hellinger distance
-    h = (1.0 / np.sqrt(2.0)) * np.sqrt(np.sum((np.sqrt(p) - np.sqrt(q))**2))
+    h = (1.0 / np.sqrt(2.0)) * np.sqrt(np.sum((np.sqrt(p) - np.sqrt(q)) ** 2))
 
     return h
 

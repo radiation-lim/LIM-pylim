@@ -83,6 +83,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylim.halo_ac3">halo_ac3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylim.helpers">helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pylim.helpers.cb_color_cycles"><code class="docutils literal notranslate"><span class="pre">cb_color_cycles</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.helpers.arg_nearest"><code class="docutils literal notranslate"><span class="pre">arg_nearest()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.helpers.delete_folder_contents"><code class="docutils literal notranslate"><span class="pre">delete_folder_contents()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.helpers.find_bases_tops"><code class="docutils literal notranslate"><span class="pre">find_bases_tops()</span></code></a></li>
@@ -731,6 +732,14 @@ nor does it submit to any jurisdiction.</p>
 <span id="helpers"></span><h2>helpers<a class="headerlink" href="#module-pylim.helpers" title="Link to this heading"></a></h2>
 <p>General helper functions and general information</p>
 <p><em>author</em>: Johannes Röttenbacher</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="pylim.helpers.cb_color_cycles">
+<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">cb_color_cycles</span></span><a class="headerlink" href="#pylim.helpers.cb_color_cycles" title="Link to this definition"></a></dt>
+<dd><p>Colorblind friendly color cycles from the <a class="reference external" href="https://github.com/Nowosad/rcartocolor">rcartocolor</a> package,
+the Okabe-Ito palette <span id="id1">[<a class="reference internal" href="references.html#id756" title="Color Universal Design (CUD) / Colorblind Barrier Free. https://jfly.uni-koeln.de/color/."><em>Color Universal Design (CUD) / Colorblind Barrier Free</em>, n.d.</a>]</span> and the survey from <span id="id2">Petroff [<a class="reference internal" href="references.html#id757" title="Matthew A. Petroff. Accessible Color Sequences for Data Visualization. December 2021. arXiv:2107.02270, doi:10.48550/arXiv.2107.02270.">2021</a>]</span></p>
+<img alt="Image of the colors" src="_images/cb_color_cycles.png" />
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.helpers.arg_nearest">
 <span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">arg_nearest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#arg_nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.arg_nearest" title="Link to this definition"></a></dt>
@@ -786,8 +795,13 @@ cloud_mask (np.array) : integer array, containing +1 for cloud tops, -1 for clou
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.helpers.get_cb_friendly_colors">
-<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">get_cb_friendly_colors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#get_cb_friendly_colors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.get_cb_friendly_colors" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">get_cb_friendly_colors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cartocolor'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/pylim/helpers.html#get_cb_friendly_colors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.get_cb_friendly_colors" title="Link to this definition"></a></dt>
 <dd><p>Get colorblind friendly color cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – Name of color cycle</p>
+</dd>
+</dl>
 <p>Returns: List with colorblind friendly colors</p>
 </dd></dl>
 
@@ -910,8 +924,13 @@ See: <a class="reference external" href="https://thispointer.com/python-iterate-
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.helpers.set_cb_friendly_colors">
-<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">set_cb_friendly_colors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#set_cb_friendly_colors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.set_cb_friendly_colors" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">set_cb_friendly_colors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cartocolor'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#set_cb_friendly_colors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.set_cb_friendly_colors" title="Link to this definition"></a></dt>
 <dd><p>Set new colorblind friendly color cycle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – Name of color cycle</p>
+</dd>
+</dl>
 <p>Returns: Modifies the standard pyplot color cycle</p>
 </dd></dl>
 
@@ -1117,7 +1136,7 @@ Rerun the failed simulations a couple of times before quitting.</p>
 <dt class="sig sig-object py" id="pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice">
 <span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">relative_humidity_water_to_relative_humidity_ice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_humidity_water</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'huang'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#relative_humidity_water_to_relative_humidity_ice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice" title="Link to this definition"></a></dt>
 <dd><p>Convert the relative humidity over water to relative humidity over ice using either the formulas by
-<span id="id1">Huang [<a class="reference internal" href="references.html#id266" title="Jianhua Huang. A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice. J. Appl. Meteorol. Clim., 57(6):1265–1272, June 2018. doi:10.1175/jamc-d-17-0334.1.">2018</a>]</span> or by <span id="id2">Alduchov and Eskridge [<a class="reference internal" href="references.html#id16" title="Oleg A. Alduchov and Robert E. Eskridge. Improved Magnus Form Approximation of Saturation Vapor Pressure. J Appl Meteorol, 35(4):601–609, April 1996. doi:10.1175/1520-0450(1996)035&lt;0601:imfaos&gt;2.0.co;2.">1996</a>]</span>.</p>
+<span id="id3">Huang [<a class="reference internal" href="references.html#id266" title="Jianhua Huang. A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice. J. Appl. Meteorol. Clim., 57(6):1265–1272, June 2018. doi:10.1175/jamc-d-17-0334.1.">2018</a>]</span> or by <span id="id4">Alduchov and Eskridge [<a class="reference internal" href="references.html#id16" title="Oleg A. Alduchov and Robert E. Eskridge. Improved Magnus Form Approximation of Saturation Vapor Pressure. J Appl Meteorol, 35(4):601–609, April 1996. doi:10.1175/1520-0450(1996)035&lt;0601:imfaos&gt;2.0.co;2.">1996</a>]</span>.</p>
 <div class="math notranslate nohighlight">
 \[RH_{ice} = \frac{RH_{water} * e_{s,w}}{e_{s,i}}\]</div>
 <p>with <span class="math notranslate nohighlight">\(e_{s,w}\)</span> the saturation vapor pressure of water and <span class="math notranslate nohighlight">\(e_{s,i}\)</span> the saturation vapor pressure of ice:</p>
