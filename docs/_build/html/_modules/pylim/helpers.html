@@ -82,19 +82,18 @@
 
 <span class="sd">*author*: Johannes Röttenbacher</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
-
-<span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
+<span class="kn">import</span> <span class="nn">toml</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">toml</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -147,6 +146,7 @@
                   <span class="n">crwc</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;mg$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;g$\,$kg$^{-1}$&quot;</span><span class="p">,</span> <span class="n">re_ice</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\mu$m&quot;</span><span class="p">,</span> <span class="n">re_liquid</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\mu$m&quot;</span><span class="p">,</span>
                   <span class="n">heating_rate_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span> <span class="n">heating_rate_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span>
                   <span class="n">heating_rate_net</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;K$\,$day$^{-1}$&quot;</span><span class="p">,</span>
+                  <span class="n">o3_mmr</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;kg$\,$kg$^{-1}$&quot;</span><span class="p">,</span>
                   <span class="n">flux_dn_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">flux_dn_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">flux_up_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
                   <span class="n">flux_up_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
                   <span class="n">cre_sw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">cre_lw</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span> <span class="n">cre_total</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;W$\,$m$^{-2}$&quot;</span><span class="p">,</span>
@@ -159,7 +159,7 @@
 <span class="n">cbarlabels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cloud_fraction</span><span class="o">=</span><span class="s2">&quot;Cloud fraction&quot;</span><span class="p">,</span> <span class="n">clwc</span><span class="o">=</span><span class="s2">&quot;Cloud liquid water content&quot;</span><span class="p">,</span> <span class="n">ciwc</span><span class="o">=</span><span class="s2">&quot;Cloud ice water content&quot;</span><span class="p">,</span>
                   <span class="n">cswc</span><span class="o">=</span><span class="s2">&quot;Cloud snow water content&quot;</span><span class="p">,</span> <span class="n">crwc</span><span class="o">=</span><span class="s2">&quot;Cloud rain water content&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="s2">&quot;Temperature&quot;</span><span class="p">,</span>
                   <span class="n">q</span><span class="o">=</span><span class="s2">&quot;Specific humidity&quot;</span><span class="p">,</span> <span class="n">q_ice</span><span class="o">=</span><span class="s2">&quot;Ice mass mixing ratio&quot;</span><span class="p">,</span> <span class="n">q_liquid</span><span class="o">=</span><span class="s2">&quot;Liquid mass mixing ratio&quot;</span><span class="p">,</span>
-                  <span class="n">iwp</span><span class="o">=</span><span class="s2">&quot;Ice water path&quot;</span><span class="p">,</span> <span class="n">iwc</span><span class="o">=</span><span class="s2">&quot;Ice water content&quot;</span><span class="p">,</span>
+                  <span class="n">iwp</span><span class="o">=</span><span class="s2">&quot;Ice water path&quot;</span><span class="p">,</span> <span class="n">iwc</span><span class="o">=</span><span class="s2">&quot;Ice water content&quot;</span><span class="p">,</span> <span class="n">o3_mmr</span><span class="o">=</span><span class="s2">&quot;Ozone mass mixing ratio&quot;</span><span class="p">,</span>
                   <span class="n">re_ice</span><span class="o">=</span><span class="s2">&quot;Ice effective radius&quot;</span><span class="p">,</span> <span class="n">re_liquid</span><span class="o">=</span><span class="s2">&quot;Liquid effective radius&quot;</span><span class="p">,</span>
                   <span class="n">heating_rate_sw</span><span class="o">=</span><span class="s2">&quot;Solar heating rate&quot;</span><span class="p">,</span> <span class="n">heating_rate_lw</span><span class="o">=</span><span class="s2">&quot;Terrestrial heating rate&quot;</span><span class="p">,</span>
                   <span class="n">heating_rate_net</span><span class="o">=</span><span class="s2">&quot;Net heating rate&quot;</span><span class="p">,</span>
@@ -202,6 +202,25 @@
                       <span class="n">F_net_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{net, solar}$&quot;</span><span class="p">,</span> <span class="n">F_net_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$F_{net, terrestrial}$&quot;</span><span class="p">,</span>
                       <span class="n">CRE_solar</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{solar}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">CRE_terrestrial</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{terrestrial}</span><span class="s2">$&quot;</span><span class="p">,</span>
                       <span class="n">CRE_total</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;CRE$_</span><span class="si">{total}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="n">cb_color_cycles</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">cartocolor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#88CCEE&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC6677&quot;</span><span class="p">,</span> <span class="s2">&quot;#DDCC77&quot;</span><span class="p">,</span> <span class="s2">&quot;#332288&quot;</span><span class="p">,</span> <span class="s2">&quot;#AA4499&quot;</span><span class="p">,</span> <span class="s2">&quot;#44AA99&quot;</span><span class="p">,</span> <span class="s2">&quot;#999933&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;#882255&quot;</span><span class="p">,</span> <span class="s2">&quot;#661100&quot;</span><span class="p">,</span> <span class="s2">&quot;#6699CC&quot;</span><span class="p">,</span> <span class="s2">&quot;#117733&quot;</span><span class="p">,</span> <span class="s2">&quot;#888888&quot;</span><span class="p">],</span>
+    <span class="c1"># orange, skyblue, bluishgreen, yellow, blue, vermillion, reddishpurple, gray, black</span>
+    <span class="n">okabe_ito</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#E69F00&quot;</span><span class="p">,</span> <span class="s2">&quot;#56B4E9&quot;</span><span class="p">,</span> <span class="s2">&quot;#009E73&quot;</span><span class="p">,</span> <span class="s2">&quot;#F0E442&quot;</span><span class="p">,</span> <span class="s2">&quot;#0072B2&quot;</span><span class="p">,</span> <span class="s2">&quot;#D55E00&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;#CC79A7&quot;</span><span class="p">,</span> <span class="s2">&quot;#999999&quot;</span><span class="p">,</span> <span class="s2">&quot;#000000&quot;</span><span class="p">],</span>
+    <span class="n">petroff_6</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#5790fc&quot;</span><span class="p">,</span> <span class="s2">&quot;#f89c20&quot;</span><span class="p">,</span> <span class="s2">&quot;#e42536&quot;</span><span class="p">,</span> <span class="s2">&quot;#964a8b&quot;</span><span class="p">,</span> <span class="s2">&quot;#9c9ca1&quot;</span><span class="p">,</span> <span class="s2">&quot;#7a21dd&quot;</span><span class="p">],</span>
+    <span class="n">petroff_8</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#1845fb&quot;</span><span class="p">,</span> <span class="s2">&quot;#ff5e02&quot;</span><span class="p">,</span> <span class="s2">&quot;#c91f16&quot;</span><span class="p">,</span> <span class="s2">&quot;#c849a9&quot;</span><span class="p">,</span> <span class="s2">&quot;#adad7d&quot;</span><span class="p">,</span> <span class="s2">&quot;#86c8dd&quot;</span><span class="p">,</span> <span class="s2">&quot;#578dff&quot;</span><span class="p">,</span> <span class="s2">&quot;#656364&quot;</span><span class="p">],</span>
+    <span class="n">petroff_10</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#3f90da&quot;</span><span class="p">,</span> <span class="s2">&quot;#ffa90e&quot;</span><span class="p">,</span> <span class="s2">&quot;#bd1f01&quot;</span><span class="p">,</span> <span class="s2">&quot;#94a4a2&quot;</span><span class="p">,</span> <span class="s2">&quot;#832db6&quot;</span><span class="p">,</span> <span class="s2">&quot;#a96b59&quot;</span><span class="p">,</span> <span class="s2">&quot;#e76300&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;#b9ac70&quot;</span><span class="p">,</span> <span class="s2">&quot;#717581&quot;</span><span class="p">,</span> <span class="s2">&quot;#92dadd&quot;</span><span class="p">])</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Colorblind friendly color cycles from the `rcartocolor &lt;https://github.com/Nowosad/rcartocolor&gt;`_ package,</span>
+<span class="sd">the Okabe-Ito palette :cite:p:`zotero-1251` and the survey from :cite:t:`petroff2021`</span>
+
+<span class="sd">.. image:: ./figures/cb_color_cycles.png</span>
+<span class="sd">    :alt: Image of the colors</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <div class="viewcode-block" id="get_path">
 <a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.get_path">[docs]</a>
@@ -447,28 +466,40 @@
 
 <div class="viewcode-block" id="set_cb_friendly_colors">
 <a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.set_cb_friendly_colors">[docs]</a>
-<span class="k">def</span> <span class="nf">set_cb_friendly_colors</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set new colorblind friendly color cycle.</span>
+<span class="k">def</span> <span class="nf">set_cb_friendly_colors</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cartocolor&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set new colorblind friendly color cycle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Name of color cycle</span>
 
 <span class="sd">    Returns: Modifies the standard pyplot color cycle</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cb_color_cycle</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#88CCEE&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC6677&quot;</span><span class="p">,</span> <span class="s2">&quot;#DDCC77&quot;</span><span class="p">,</span> <span class="s2">&quot;#117733&quot;</span><span class="p">,</span> <span class="s2">&quot;#332288&quot;</span><span class="p">,</span> <span class="s2">&quot;#AA4499&quot;</span><span class="p">,</span> <span class="s2">&quot;#44AA99&quot;</span><span class="p">,</span> <span class="s2">&quot;#999933&quot;</span><span class="p">,</span> <span class="s2">&quot;#882255&quot;</span><span class="p">,</span>
-                      <span class="s2">&quot;#661100&quot;</span><span class="p">,</span> <span class="s2">&quot;#6699CC&quot;</span><span class="p">,</span> <span class="s2">&quot;#888888&quot;</span><span class="p">]</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cycler</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">cb_color_cycle</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">new_color_cycle</span> <span class="o">=</span> <span class="n">cb_color_cycles</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No color cycle with name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found! &quot;</span>
+                       <span class="sa">f</span><span class="s2">&quot;Use one of </span><span class="si">{</span><span class="n">cb_color_cycles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cycler</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">new_color_cycle</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_cb_friendly_colors">
 <a class="viewcode-back" href="../../api_documentation.html#pylim.helpers.get_cb_friendly_colors">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cb_friendly_colors</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get colorblind friendly color cycle.</span>
+<span class="k">def</span> <span class="nf">get_cb_friendly_colors</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cartocolor&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get colorblind friendly color cycle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Name of color cycle</span>
 
 <span class="sd">    Returns: List with colorblind friendly colors</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;#88CCEE&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC6677&quot;</span><span class="p">,</span> <span class="s2">&quot;#DDCC77&quot;</span><span class="p">,</span> <span class="s2">&quot;#117733&quot;</span><span class="p">,</span> <span class="s2">&quot;#332288&quot;</span><span class="p">,</span> <span class="s2">&quot;#AA4499&quot;</span><span class="p">,</span> <span class="s2">&quot;#44AA99&quot;</span><span class="p">,</span> <span class="s2">&quot;#999933&quot;</span><span class="p">,</span> <span class="s2">&quot;#882255&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;#661100&quot;</span><span class="p">,</span> <span class="s2">&quot;#6699CC&quot;</span><span class="p">,</span> <span class="s2">&quot;#888888&quot;</span><span class="p">]</span></div>
+
+    <span class="k">return</span> <span class="n">cb_color_cycles</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;No color cycle with name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found! &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;Use one of </span><span class="si">{</span><span class="n">cb_color_cycles</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 
@@ -696,7 +727,7 @@
     <span class="n">lon_values_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
     <span class="n">lon_values_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lons</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lon_values</span><span class="p">):</span>
-        <span class="n">all_lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="n">lons</span><span class="o">+</span><span class="mi">180</span><span class="p">)</span><span class="o">%</span><span class="mi">360</span> <span class="o">-</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
+        <span class="n">all_lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lons</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">,</span> <span class="p">(</span><span class="n">lons</span> <span class="o">+</span> <span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span> <span class="o">-</span> <span class="mi">180</span><span class="p">,</span> <span class="n">lons</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_lons</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">all_lons</span><span class="p">)),</span> <span class="sa">f</span><span class="s2">&quot;Non unique longitude values found for </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">! Check input!&quot;</span>
         <span class="k">if</span> <span class="n">longitude_boundaries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">all_lons</span> <span class="o">=</span> <span class="n">all_lons</span><span class="p">[(</span><span class="n">all_lons</span> <span class="o">&gt;=</span> <span class="n">longitude_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">all_lons</span> <span class="o">&lt;=</span> <span class="n">longitude_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
@@ -734,7 +765,7 @@
     <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;Input distributions must have the same shape.&quot;</span>
 
     <span class="c1"># Calculate the Hellinger distance</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">h</span></div>
 

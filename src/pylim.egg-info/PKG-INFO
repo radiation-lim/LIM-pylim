@@ -2,10 +2,11 @@ Metadata-Version: 2.1
 Name: pylim
 Version: 1.0.0
 Summary: Useful functions, tools and metadata used at the Leipzig Institute for Meteorology
+Author: Hanno Müller, André Ehrlich
 Author-email: Johannes Röttenbacher <johannes.roettenbacher@uni-leipzig.de>
 License: MIT License
         
-        Copyright (c) 2022 - Johannes Röttenbacher
+        Copyright (c) 2023 - Leipzig Institute for Meteorology - Radiation working group
         
         Permission is hereby granted, free of charge, to any person obtaining a copy
         of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +25,8 @@ License: MIT License
         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
-Project-URL: Homepage, https://github.com/jroettenbacher/pylim
+Project-URL: GitHub, https://github.com/radiation-lim/LIM-pylim
+Project-URL: Documentation, https://radiation-lim.github.io/LIM-pylim/
 Keywords: meteorology,Leipzig,tools
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
@@ -44,36 +46,58 @@ Requires-Dist: joblib
 Requires-Dist: pysolar
 Requires-Dist: geopy
 Requires-Dist: cmasher
+Requires-Dist: importlib_resources
+Requires-Dist: cartopy
+Requires-Dist: holoviews
 Provides-Extra: dev
 Requires-Dist: black; extra == "dev"
 Requires-Dist: bumpver; extra == "dev"
 Requires-Dist: isort; extra == "dev"
 Requires-Dist: pip-tools; extra == "dev"
 Requires-Dist: pytest; extra == "dev"
+Requires-Dist: sphinx; extra == "dev"
+Requires-Dist: sphinx_rtd_theme; extra == "dev"
+Requires-Dist: sphinxcontrib.bibtex; extra == "dev"
+Requires-Dist: sphinx-copybutton; extra == "dev"
 
-# PhD Base Project
-
-*author: Johannes Röttenbacher*
-
-Here I code all the stuff I need for my PhD on Arctic cirrus. 
-It includes processing for measurement data gathered by the HALO aircraft.
-During the first year a new python package was created which provides useful functions used in the processing and analysis of the data.
-The package is called `pylim` and can be found in `src`.
-Further there are folders for different purposes:
-
-* `analysis`: case studies or general campaign analysis to answer scientific questions
-* `processing`: scripts to generate error/bias corrected, calibrated and shareable/publishable files from raw files
-* `quicklooks`: quicklooks of measurements (raw and calibrated) and of calibrations
-
-The data is sorted by flight.
-The exact paths are defined in `config.toml` and can be adjusted according to your setup.
-More information on how to adjust this file can be found in [Setup](./docs/setup.rst).
-
-Documentation can be found [here](https://jroettenbacher.github.io/phd_base/).
+# LIM-pylim
 
 
-## FAQ
+A python package bundling processing functions and tools for the atmospheric radiation working group at the Leipzig Institute for Meteorology, Germany.
 
-* What do negative measurements in the SMART dark current mean?
+Documentation: https://radiation-lim.github.io/LIM-pylim/
 
-Answer: The conversion of the analog signal to a digital can lead to this.
+# Installation instructions:
+
+## Installing and using pylim from GitHub
+If you only want to use the functions available and install pylim like a normal python package this is all you need to do:
+
+1. On your machine open a terminal
+2. Activate the [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) you want to install pylim to
+	`conda activate environment_name`
+3. Install pylim from GitHub
+	`python -m pip install git+https://github.com/radiation-lim/LIM-pylim.git`
+
+## Contributing to pylim from within the group
+
+1. Get a GitHub Account and get added to the organization 
+2. Download [GitHub Desktop](https://desktop.github.com/)
+3. On GitHub click the green Code button and click Open in GitHub Desktop
+4. Select where you want to save the repository (e.g. .../PyCharmProjects/LIM-pylim)
+5. In GitHub Desktop go to File/Options and under Accounts sign in to GitHub
+
+Under current branch create a new branch (e.g. jr-dev). The new branch will now be checked out and all changes happen on this branch.
+You can publish the branch to GitHub now.
+
+To immediately make use of changes you introduce to pylim you need to install install in editable mode (-e) in your conda environment. Make sure you have your development branch checked out!
+
+1. Activate your environment: `conda activate environment_name`
+2. Install your pylim version in editable mode: `python -m pip install -e <path>`
+	`<path>` is the same path that you used to save the repository to (see step 4. above)
+
+All changes in pylim are now available with a simple restart of your python console. No need to reinstall pylim each time you change something.
+
+
+Documentation can be found at
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
