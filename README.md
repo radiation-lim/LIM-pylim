@@ -27,7 +27,7 @@ If you only want to use the functions available and install pylim like a normal 
 Under current branch create a new branch (e.g. jr-dev). The new branch will now be checked out and all changes happen on this branch.
 You can publish the branch to GitHub now.
 
-To immediately make use of changes you introduce to pylim you need to install install in editable mode (-e) in your conda environment. Make sure you have your development branch checked out!
+To immediately make use of changes you introduce to pylim you need to install in editable mode (-e) in your conda environment. Make sure you have your development branch checked out!
 
 1. Activate your environment: `conda activate environment_name`
 2. Install your pylim version in editable mode: `python -m pip install -e <path>`
