@@ -1,3 +1,5 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # LIM-pylim
 
 
@@ -34,8 +36,3 @@ To immediately make use of changes you introduce to pylim you need to install in
 	`<path>` is the same path that you used to save the repository to (see step 4. above)
 
 All changes in pylim are now available with a simple restart of your python console. No need to reinstall pylim each time you change something.
-
-
-Documentation can be found at
-
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
