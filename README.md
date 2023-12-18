@@ -16,7 +16,9 @@ If you only want to use the functions available and install pylim like a normal 
 2. Activate the [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) you want to install pylim to
 	`conda activate environment_name`
 3. Install pylim from GitHub
-	`python -m pip install git+https://github.com/radiation-lim/LIM-pylim.git`
+```bash
+python -m pip install git+https://github.com/radiation-lim/LIM-pylim.git
+```
 
 ## Contributing to pylim from within the group
 
@@ -32,7 +34,10 @@ You can publish the branch to GitHub now.
 To immediately make use of changes you introduce to pylim you need to install in editable mode (-e) in your conda environment. Make sure you have your development branch checked out!
 
 1. Activate your environment: `conda activate environment_name`
-2. Install your pylim version in editable mode: `python -m pip install -e <path>`
-	`<path>` is the same path that you used to save the repository to (see step 4. above)
+2. Install your pylim version in editable mode:
+```bash
+python -m pip install -e <path>
+```
+`<path>` is the same path that you used to save the repository to (see step 4. above)
 
 All changes in pylim are now available with a simple restart of your python console. No need to reinstall pylim each time you change something.
