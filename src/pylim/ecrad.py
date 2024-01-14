@@ -680,15 +680,28 @@ def apply_ice_effective_radius(ds: xr.Dataset) -> xr.Dataset:
     Returns: DataSet with new variable re_ice containing the ice effective radius for each point
 
     """
-    # check if time, lat and lon are dimensions in data set and adjust chunking accordingly
-    if "time" in ds.dims and "lat" in ds.dims and "lon" in ds.dims:
-        chunk_dict = {"time": 1, "level": 10, "lat": 10, "lon": 10}
-    elif "lat" in ds.dims and "lon" in ds.dims:
-        chunk_dict = {"level": 10, "lat": 10, "lon": 10}
-    elif "time" not in ds.dims and "lat" not in ds.dims and "lon" not in ds.dims:
-        chunk_dict = {"level": 10}
-    elif "time" in ds.dims and "level" in ds.dims:
-        chunk_dict = {"time": 10, "level": 10}
+    chunk_dict = dict()
+    # check which dimensions are in the data set and adjust chunking accordingly
+    if "rgrid" in ds.dims:
+        # we deal with an IFS data set on a reduced gaussian grid
+        chunk_dict["rgrid"] = 10
+        if "time" in ds.dims:
+            # it has more than one time step
+            chunk_dict["time"] = 1
+        if "level" in ds.dims:
+            # it has more than one vertical level
+            chunk_dict["level"] = 10
+    elif "lat" in ds.dims:
+        # we deal with an IFS data set on a regular lat lon grid
+        chunk_dict["lat"] = 10
+        chunk_dict["lon"] = 10
+        if "level" in ds.dims:
+            chunk_dict["level"] = 10
+        if "time" in ds.dims:
+            chunk_dict["time"] = 1
+    elif "lat" not in ds.dims and "rgrid" not in ds.dims:
+        # only one column is given
+        chunk_dict["level"] = 10
     else:
         raise ValueError(
             f"Input dimensions {ds.dims} do not match any combination of expected dimensions"
