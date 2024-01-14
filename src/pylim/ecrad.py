@@ -18,6 +18,7 @@ import pylim.meteorological_formulas as met
 log = logging.getLogger(__name__)
 
 version_names = dict(
+    v13="Fu-IFS",
     v15="Fu-IFS",
     v16="Fu-IFS VarCloud",
     v17="Fu-IFS VarCloud",
@@ -28,33 +29,30 @@ version_names = dict(
     v22="Fu-IFS 3D",
     v28="Yi VarCloud",
     v29="Yi VarCloud",
+    v30="Fu-IFS",
+    v31="Yi",
+    v32="Baran2016",
+    v33="Fu-IFS VarCloud",
+    v34="Yi VarCloud",
+    v35="Baran2016 VarCloud"
 )
+
+name_versions = {
+    "Fu-IFS": ["v15", "v30"],
+    "Fu-IFS VarCloud": ["v16", "v17", "v33"],
+    "Yi2013": ["v19", "v31"],
+    "Yi2013 VarCloud": ["v28", "v29"],
+    "Baran2016": ["v18", "v32"],
+    "Baran2016 VarCloud": ["v20", "v21", "v35"]
+}
 
 # which ice optic parameterization is used by which namelist version
 ice_optic_parameterizations = dict(
-    fu=[
-        "v1",
-        "v5",
-        "v8",
-        "v10",
-        "v11",
-        "v12",
-        "v13",
-        "v13.1",
-        "v13.2",
-        "v14",
-        "v15",
-        "v16",
-        "v17",
-        "v22",
-        "v23",
-        "v26",
-        "v30",
-        "v30.1",
-        "v33",
-    ],
-    baran2016=["v6", "v7", "v9", "v18", "v20", "v21", "v24", "v25", "v27", "v32", "v32.1", "v35"],
-    yi=["v4", "v19", "v28", "v29", "v31", "v31.1", "v34"],
+    fu=["v1", "v5", "v8", "v10", "v11", "v12", "v13", "v14",
+        "v15", "v16", "v17", "v22", "v23", "v26", "v30", "v33"],
+    baran2016=["v6", "v7", "v9", "v18", "v20", "v21", "v24",
+               "v25", "v27", "v32", "v35"],
+    yi=["v4", "v19", "v28", "v29", "v31", "v34"],
 )
 
 
