@@ -40,7 +40,7 @@ version_names = dict(
 name_versions = {
     "Fu-IFS": ["v1", "v13", "v15", "v30"],
     "Fu-IFS VarCloud": ["v16", "v17", "v33", "v36"],
-    "Fu-IFS 3D": ["v22"]
+    "Fu-IFS 3D": ["v22"],
     "Yi2013": ["v19", "v31"],
     "Yi2013 VarCloud": ["v28", "v29", "v34", "v37"],
     "Baran2016": ["v18", "v32"],
