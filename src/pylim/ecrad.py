@@ -39,11 +39,11 @@ version_names = dict(
 
 name_versions = {
     "Fu-IFS": ["v15", "v30"],
-    "Fu-IFS VarCloud": ["v16", "v17", "v33"],
+    "Fu-IFS VarCloud": ["v16", "v17", "v33", "v36"],
     "Yi2013": ["v19", "v31"],
-    "Yi2013 VarCloud": ["v28", "v29"],
+    "Yi2013 VarCloud": ["v28", "v29", "v37"],
     "Baran2016": ["v18", "v32"],
-    "Baran2016 VarCloud": ["v20", "v21", "v35"]
+    "Baran2016 VarCloud": ["v20", "v21", "v35", "v38"]
 }
 
 # which ice optic parameterization is used by which namelist version
