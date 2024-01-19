@@ -38,10 +38,11 @@ version_names = dict(
 )
 
 name_versions = {
-    "Fu-IFS": ["v15", "v30"],
+    "Fu-IFS": ["v1", "v13", "v15", "v30"],
     "Fu-IFS VarCloud": ["v16", "v17", "v33", "v36"],
+    "Fu-IFS 3D": ["v22"]
     "Yi2013": ["v19", "v31"],
-    "Yi2013 VarCloud": ["v28", "v29", "v37"],
+    "Yi2013 VarCloud": ["v28", "v29", "v34", "v37"],
     "Baran2016": ["v18", "v32"],
     "Baran2016 VarCloud": ["v20", "v21", "v35", "v38"]
 }
@@ -54,6 +55,25 @@ ice_optic_parameterizations = dict(
     baran2016=["v6", "v7", "v9", "v18", "v20", "v21", "v24",
                "v25", "v27", "v32", "v35", "v38"],
 )
+
+
+def get_version_name(version: str) -> str:
+    """ Return version name to given version string.
+
+    Args:
+        version: Three character version string (e.g. v15)
+
+    Returns: Name of version
+
+    """
+    vals = list(ecrad.name_versions.values())
+    for i in range(len(vals)):
+        if v in vals[i]:
+            result = list(ecrad.name_versions.keys())[i]
+    if result is not None:
+        return result
+    else:
+        raise ValueError("Version not found!")
 
 
 def ice_effective_radius(PPRESSURE, PTEMPERATURE, PCLOUD_FRAC, PQ_ICE, PQ_SNOW, PLAT):
