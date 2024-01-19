@@ -23,17 +23,17 @@ version_names = dict(
     v16="Fu-IFS VarCloud",
     v17="Fu-IFS VarCloud",
     v18="Baran2016",
-    v19="Yi",
+    v19="Yi2013",
     v20="Baran2016 VarCloud",
     v21="Baran2016 VarCloud",
     v22="Fu-IFS 3D",
-    v28="Yi VarCloud",
-    v29="Yi VarCloud",
+    v28="Yi2013 VarCloud",
+    v29="Yi2013 VarCloud",
     v30="Fu-IFS",
-    v31="Yi",
+    v31="Yi2013",
     v32="Baran2016",
     v33="Fu-IFS VarCloud",
-    v34="Yi VarCloud",
+    v34="Yi2013 VarCloud",
     v35="Baran2016 VarCloud"
 )
 
