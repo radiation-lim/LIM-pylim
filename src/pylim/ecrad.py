@@ -49,10 +49,10 @@ name_versions = {
 # which ice optic parameterization is used by which namelist version
 ice_optic_parameterizations = dict(
     fu=["v1", "v5", "v8", "v10", "v11", "v12", "v13", "v14",
-        "v15", "v16", "v17", "v22", "v23", "v26", "v30", "v33"],
+        "v15", "v16", "v17", "v22", "v23", "v26", "v30", "v33", "v36"],
+    yi=["v4", "v19", "v28", "v29", "v31", "v34", "v37"],
     baran2016=["v6", "v7", "v9", "v18", "v20", "v21", "v24",
-               "v25", "v27", "v32", "v35"],
-    yi=["v4", "v19", "v28", "v29", "v31", "v34"],
+               "v25", "v27", "v32", "v35", "v38"],
 )
 
 
