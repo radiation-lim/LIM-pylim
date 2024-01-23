@@ -162,6 +162,24 @@ def barometric_height_simple(pressure):
 
     return barometric_height
 
+def calculate_open_ocean_albedo_taylor(cos_sza: ArrayLike):
+    """
+    Calculate the open ocean albedo for direct incoming solar irradiance following :cite:t:`taylor1996`.
+
+    .. math::
+
+        \\alpha = \\frac{0.037}{1.1 * \\cos(\\theta)^{1.4} + 0.15}
+
+    with :math:`\\theta` being the solar zenith angle in radians.
+
+    Args:
+        coz_sza: cosine of the solar zenith angle
+
+    Returns: open ocean albedo
+
+    """
+    return 0.037 / (1.1 * cos_sza ** 1.4 + 0.15)
+
 
 if __name__ == "__main__":
     pressure_half = np.array(
