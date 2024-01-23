@@ -66,10 +66,10 @@ def get_version_name(version: str) -> str:
     Returns: Name of version
 
     """
-    vals = list(ecrad.name_versions.values())
+    vals = list(name_versions.values())
     for i in range(len(vals)):
-        if v in vals[i]:
-            result = list(ecrad.name_versions.keys())[i]
+        if version in vals[i]:
+            result = list(name_versions.keys())[i]
     if result is not None:
         return result
     else:
