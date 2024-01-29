@@ -11,13 +11,12 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=f281be69"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -28,18 +27,14 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="../../index.html" class="icon icon-home">
-            pylim
+            <a href="../../index.html" class="icon icon-home"> pylim
           </a>
               <div class="version">
                 1.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -65,9 +60,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">pylim.solar_position</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>pylim.solar_position</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -85,9 +80,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="dec">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.dec">[docs]</a>
-<span class="k">def</span> <span class="nf">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+<div class="viewcode-block" id="dec"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.dec">[docs]</a><span class="k">def</span> <span class="nf">dec</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Declination calculated after Michalsky, J.  1988.</span>
 <span class="sd">    **Reference**: Michalsky, J.  1988. The Astronomical Almanac&#39;s algorithm for approximate solar position (1950-2050). Solar Energy 40 (3), pp. 227-235.</span>
@@ -145,10 +138,7 @@
     <span class="k">return</span> <span class="n">dec</span></div>
 
 
-
-<div class="viewcode-block" id="get_saa">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_saa">[docs]</a>
-<span class="k">def</span> <span class="nf">get_saa</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">):</span>
+<div class="viewcode-block" id="get_saa"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_saa">[docs]</a><span class="k">def</span> <span class="nf">get_saa</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the solar azimuth angles.</span>
 <span class="sd">    Requires function julian_day,local_time,dec</span>
@@ -195,10 +185,7 @@
     <span class="k">return</span> <span class="n">azimuth</span></div>
 
 
-
-<div class="viewcode-block" id="get_sza">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_sza">[docs]</a>
-<span class="k">def</span> <span class="nf">get_sza</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+<div class="viewcode-block" id="get_sza"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.get_sza">[docs]</a><span class="k">def</span> <span class="nf">get_sza</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the solar zenith angle</span>
 <span class="sd">    Requires function julian_day,local_time,dec,refract</span>
@@ -249,10 +236,7 @@
     <span class="k">return</span> <span class="n">sza</span></div>
 
 
-
-<div class="viewcode-block" id="julian_day">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.julian_day">[docs]</a>
-<span class="k">def</span> <span class="nf">julian_day</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
+<div class="viewcode-block" id="julian_day"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.julian_day">[docs]</a><span class="k">def</span> <span class="nf">julian_day</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">t0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the day of the year (julian_day) for a given date. Jan 1 = 1, Feb 1 = 32 etc.</span>
 <span class="sd">    Considers leap years and the time of day.</span>
@@ -314,10 +298,7 @@
     <span class="k">return</span> <span class="n">jd</span></div>
 
 
-
-<div class="viewcode-block" id="local_time">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.local_time">[docs]</a>
-<span class="k">def</span> <span class="nf">local_time</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+<div class="viewcode-block" id="local_time"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.local_time">[docs]</a><span class="k">def</span> <span class="nf">local_time</span><span class="p">(</span><span class="n">julian</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the local solar time by accounting for</span>
 <span class="sd">    - longitude</span>
@@ -349,10 +330,7 @@
     <span class="k">return</span> <span class="n">corrected_local_time</span></div>
 
 
-
-<div class="viewcode-block" id="refract">
-<a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.refract">[docs]</a>
-<span class="k">def</span> <span class="nf">refract</span><span class="p">(</span><span class="n">elv</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+<div class="viewcode-block" id="refract"><a class="viewcode-back" href="../../api_documentation.html#pylim.solar_position.refract">[docs]</a><span class="k">def</span> <span class="nf">refract</span><span class="p">(</span><span class="n">elv</span><span class="p">,</span> <span class="n">pres</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Correction of the solar elevation angle for refraction</span>
 <span class="sd">    **Reference**: J.Meeus, Astronomical Algorithms, 1991, pp102</span>
@@ -382,7 +360,6 @@
     <span class="n">refcor</span> <span class="o">=</span> <span class="n">refcor</span> <span class="o">/</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
 
     <span class="k">return</span> <span class="n">refcor</span></div>
-
 </pre></div>
 
            </div>

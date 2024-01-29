@@ -83,7 +83,7 @@ def barometric_height_old(p_high, p_low, T_high):
 
 
 def barometric_height(
-    pressure_profile: ArrayLike, temperature_profile: ArrayLike
+    pressure_profile, temperature_profile
 ) -> np.ndarray:
     """
     Calculate the barometric height from a pressure and temperature profile.
@@ -179,6 +179,31 @@ def calculate_open_ocean_albedo_taylor(cos_sza: ArrayLike):
 
     """
     return 0.037 / (1.1 * cos_sza ** 1.4 + 0.15)
+
+
+def calculate_extinction_coefficient_solar(iwc: ArrayLike, reff: ArrayLike, density=916.7) -> ArrayLike:
+    """
+    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in :cite:t:`francis1994`:
+
+    .. math::
+
+        \\beta_{ext} = \\frac{3}{2} \\frac{IWC}{\\rho_{ice}r_{eff}}
+
+    with :math:`\\rho_{ice}` the density of ice and :math:`r_{eff}` the ice effective radius according to :cite:t:`foot1988`.
+
+    Integrating this over altitude results in the optical depth of the ice cloud layer.
+
+    Args:
+        iwc: Ice water content in kg/m^3
+        reff: Ice effective radius in m
+        density: Density of ice in kg/m^3
+
+    Returns: Extinction coefficient in m^-1 of the ice cloud layer in the solar wavelength range
+
+    """
+
+    b_ext = (3 * iwc) / (2 * density * reff)
+    return b_ext
 
 
 if __name__ == "__main__":

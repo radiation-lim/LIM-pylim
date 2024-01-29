@@ -135,11 +135,13 @@ cb_color_cycles = dict(
     petroff_10=["#3f90da", "#ffa90e", "#bd1f01", "#94a4a2", "#832db6", "#a96b59", "#e76300",
                 "#b9ac70", "#717581", "#92dadd"])
 """
-Colorblind friendly color cycles from the `rcartocolor <https://github.com/Nowosad/rcartocolor>`_ package,
-the Okabe-Ito palette :cite:p:`zotero-1251` and the survey from :cite:t:`petroff2021`
-
 .. image:: ./figures/cb_color_cycles.png
-    :alt: Image of the colors
+   :alt: Image of the colors
+
+Colorblind friendly color cycles from the `rcartocolor <https://github.com/Nowosad/rcartocolor>`_ package,
+the Okabe-Ito palette :cite:p:`zotero-1251` and the survey from :cite:t:`petroff2021`.
+
+
 """
 
 

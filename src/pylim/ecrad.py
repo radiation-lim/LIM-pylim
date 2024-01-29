@@ -70,9 +70,9 @@ def get_version_name(version: str) -> str:
     for i in range(len(vals)):
         if version in vals[i]:
             result = list(name_versions.keys())[i]
-    if result is not None:
+    try:
         return result
-    else:
+    except UnboundLocalError:
         raise ValueError("Version not found!")
 
 
