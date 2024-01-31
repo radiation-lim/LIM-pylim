@@ -58,7 +58,7 @@ ice_optic_parameterizations = dict(
 
 
 def get_version_name(version: str) -> str:
-    """ Return version name to given version string.
+    """Return version name to given version string.
 
     Args:
         version: Three character version string (e.g. v15)
@@ -66,14 +66,10 @@ def get_version_name(version: str) -> str:
     Returns: Name of version
 
     """
-    vals = list(name_versions.values())
-    for i in range(len(vals)):
-        if version in vals[i]:
-            result = list(name_versions.keys())[i]
-    try:
-        return result
-    except UnboundLocalError:
-        raise ValueError("Version not found!")
+    for key, values in name_versions.items():
+        if version in values:
+            return key
+    raise ValueError("Version not found!")
 
 
 def ice_effective_radius(PPRESSURE, PTEMPERATURE, PCLOUD_FRAC, PQ_ICE, PQ_SNOW, PLAT):
