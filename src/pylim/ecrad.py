@@ -10,6 +10,8 @@ import warnings
 import importlib_resources as pkg_resources
 import numpy as np
 import xarray as xr
+import pandas as pd
+import re
 from tqdm import tqdm
 
 import pylim.helpers as h
@@ -17,6 +19,10 @@ import pylim.meteorological_formulas as met
 
 log = logging.getLogger(__name__)
 
+# make list with all ecRad simulation versions
+versions = [x for x in np.arange(4, 39)] + [1, 3.1, 3.2, 13.1, 13.2]
+
+# incomplete list of version names, use name_versions and get_version_name() instead
 version_names = dict(
     v13="Fu-IFS",
     v15="Fu-IFS",
@@ -34,27 +40,48 @@ version_names = dict(
     v32="Baran2016",
     v33="Fu-IFS VarCloud",
     v34="Yi2013 VarCloud",
-    v35="Baran2016 VarCloud"
+    v35="Baran2016 VarCloud",
 )
 
 name_versions = {
-    "Fu-IFS": ["v1", "v13", "v15", "v30"],
-    "Fu-IFS VarCloud": ["v16", "v17", "v33", "v36"],
+    "Fu-IFS": [f"v{x}" for x in [1, 13, 15, 30]],
+    "Fu-IFS VarCloud": [f"v{x}" for x in [16, 17, 33, 36]],
     "Fu-IFS 3D": ["v22"],
     "Yi2013": ["v19", "v31"],
-    "Yi2013 VarCloud": ["v28", "v29", "v34", "v37"],
+    "Yi2013 VarCloud": [f"v{x}" for x in [28, 29, 34, 37]],
     "Baran2016": ["v18", "v32"],
-    "Baran2016 VarCloud": ["v20", "v21", "v35", "v38"]
+    "Baran2016 VarCloud": [f"v{x}" for x in [20, 21, 35, 38]],
+    "Baran2017": ["v2"],
 }
 
 # which ice optic parameterization is used by which namelist version
 ice_optic_parameterizations = dict(
-    fu=["v1", "v5", "v8", "v10", "v11", "v12", "v13", "v14",
-        "v15", "v16", "v17", "v22", "v23", "v26", "v30", "v33", "v36"],
-    yi=["v4", "v19", "v28", "v29", "v31", "v34", "v37"],
-    baran2016=["v6", "v7", "v9", "v18", "v20", "v21", "v24",
-               "v25", "v27", "v32", "v35", "v38"],
+    fu=[f"v{x}" for x in [1, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16,
+                          17, 22, 23, 26, 30, 33, 36]],
+    yi=[f"v{x}" for x in [4, 19, 28, 29, 31, 34, 37]],
+    baran2016=[f"v{x}" for x in [6, 7, 9, 18, 20, 21,
+                                 24, 25, 27, 32, 35, 38]],
+    baran2017=["v2"],
 )
+
+# which input version is used by which version
+input_versions = dict(
+    v1=[f"v{x}" for x in [1, 2, 3, 4, 5, 6, 7, 12]],
+    v2=[f"v{x}" for x in [8, 9]],
+    v3=[f"v{x}" for x in [10]],
+    v4=[f"v{x}" for x in [11]],
+    v5=[f"v{x}" for x in [13]],
+    v6=[f"v{x}" for x in [15, 18, 19, 22, 24, 30, 31, 32]],
+    v7=[f"v{x}" for x in [16, 20, 26, 27, 28, 33, 34, 35, 36, 37, 38]],
+    v8=[f"v{x}" for x in [17, 21, 23, 25, 29]],
+    v9=[f"v{x}" for x in [14]],
+)
+
+# which versions have the 3D parameterizations turned on
+three_d_on = ["v5", "v6", "v23", "v24", "v25", "v26", "v27"]
+
+# which versions have aerosol optics turned on
+aerosol_on = [f"v{x}" for x in [30, 31, 32, 33, 34, 35]]
 
 
 def get_version_name(version: str) -> str:
@@ -70,6 +97,67 @@ def get_version_name(version: str) -> str:
         if version in values:
             return key
     raise ValueError("Version not found!")
+
+
+def make_ecrad_version_overview_csv(version_list: list = None,
+                                    outpath: str = "./docs/files") -> None:
+    """
+    Create a csv file with information on each version of the ecRad simulations
+
+    Args:
+        version_list: list of versions of ecRad simulations e.g. [1, 3, 4, 5.2]
+        outpath: path where csv file should be saved to
+
+    Returns: a csv file
+
+    """
+    if version_list is None:
+        version_list = versions
+    version_list.sort()
+    version_list = [f"v{x}" for x in version_list]
+
+    ice_params = list()
+    i_versions = list()
+    for v in version_list:
+        error_count = 0
+        # remove .x from version names
+        v = re.sub(r"\.[0-9]", "", v)
+
+        # find ice optic parameterization for version
+        for key, values in ice_optic_parameterizations.items():
+            if v in values:
+                ice_params.append(key)
+            else:
+                error_count += 1
+        if error_count == len(ice_optic_parameterizations.keys()):
+            raise ValueError(f"{v} not found in ice_optic_parameterizations!")
+
+        # find input version for version
+        for key, values in input_versions.items():
+            if v in values:
+                i_versions.append(key)
+
+    three_d_param = ["On" if v in three_d_on else "Off" for v in version_list]
+    aerosol = ["On" if v in aerosol_on else "Off" for v in version_list]
+
+    # make dataframe
+    df = pd.DataFrame(
+        {
+            "Version": version_list,
+            "Input Version": i_versions,
+            "Ice Optics Parameterization": ice_params,
+            "3D Parameterization": three_d_param,
+            "Aerosol Optics": aerosol,
+        }
+    )
+
+    df.replace(["fu", "yi", "baran2016", "baran2017"],
+               ["Fu-IFS", "Yi2013", "Baran2016", "Baran2017"],
+               inplace=True)
+
+    df.to_csv(f"{outpath}/ecrad_version_overview.csv", index=False)
+
+    return None
 
 
 def ice_effective_radius(PPRESSURE, PTEMPERATURE, PCLOUD_FRAC, PQ_ICE, PQ_SNOW, PLAT):
