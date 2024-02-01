@@ -5,21 +5,23 @@
 - function to plot BAHAMAS map
 - get position
 - preprocess function for multiple file read in
+- function to calculate distance between two bahamas samples
 
 *author*: Johannes Röttenbacher
 """
-import datetime
-import logging
-import os
-from typing import Union, Tuple
-
 import cartopy
 import cartopy.crs as ccrs
+import datetime
+from geopy.distance import distance
+import logging
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 import pandas as pd
 import xarray as xr
+from tqdm import tqdm
+from typing import Union, Tuple
 
 import pylim.helpers as h
 from pylim import reader
@@ -172,5 +174,30 @@ def preprocess_bahamas(ds: xr.Dataset) -> xr.Dataset:
     """
     ds = ds.swap_dims({"tid": "TIME"})
     ds = ds.rename({"TIME": "time"})
+    return ds
+
+
+def calculate_distances(ds: xr.Dataset) -> xr.Dataset:
+    """
+    Calculate geodesic distance between each aircraft time step
+
+    Args:
+        ds: BAHAMAS dataset
+
+    Returns: New dataset with geodesic distances
+
+    """
+    loc1 = [(lat, lon) for lat, lon in
+            zip(ds.IRS_LAT[:-1].to_numpy(), ds.IRS_LON[:-1].to_numpy())]
+    loc2 = [(lat, lon) for lat, lon in
+            zip(ds.IRS_LAT[1:].to_numpy(), ds.IRS_LON[1:].to_numpy())]
+    distances = [distance(p1, p2).m for p1, p2 in
+                 zip(tqdm(loc1, desc="Geodesic distance"), loc2)]
+    distances.insert(0, 0)  # add zero as the first value to keep same length of values
+    ds["distance"] = xr.DataArray(distances, dims="time",
+                                  attrs=dict(units="m", long_name="geodesic distance",
+                                             description="Distance between the previous and this point.\n"
+                                                         "Does not work for locations in different altitudes!"))
+
     return ds
 
