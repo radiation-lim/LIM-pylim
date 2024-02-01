@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Documentation &mdash; pylim 1.0.0 documentation</title>
+  <title>API Documentation &mdash; pylim 1.4.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -33,7 +33,7 @@
             <a href="index.html" class="icon icon-home"> pylim
           </a>
               <div class="version">
-                1.0.0
+                1.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -147,8 +147,21 @@ Corrects downward irradiance for misalignment of the sensor (deviation from hori
 <li><p>function to plot BAHAMAS map</p></li>
 <li><p>get position</p></li>
 <li><p>preprocess function for multiple file read in</p></li>
+<li><p>function to calculate distance between two bahamas samples</p></li>
 </ul>
 <p><em>author</em>: Johannes Röttenbacher</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pylim.bahamas.calculate_distances">
+<span class="sig-prename descclassname"><span class="pre">pylim.bahamas.</span></span><span class="sig-name descname"><span class="pre">calculate_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">xarray.core.dataset.Dataset</span></span></span><a class="reference internal" href="_modules/pylim/bahamas.html#calculate_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.bahamas.calculate_distances" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate geodesic distance between each aircraft time step</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ds</strong> – BAHAMAS dataset</p>
+</dd>
+</dl>
+<p>Returns: New dataset with geodesic distances</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.bahamas.get_position">
 <span class="sig-prename descclassname"><span class="pre">pylim.bahamas.</span></span><span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/pylim/bahamas.html#get_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.bahamas.get_position" title="Permalink to this definition"></a></dt>
@@ -620,6 +633,21 @@ nor does it submit to any jurisdiction.</p>
 </dd>
 </dl>
 <p>Returns: liquid effective radius in meter after Martin et al. (JAS 1994)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylim.ecrad.make_ecrad_version_overview_csv">
+<span class="sig-prename descclassname"><span class="pre">pylim.ecrad.</span></span><span class="sig-name descname"><span class="pre">make_ecrad_version_overview_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'./docs/files'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/pylim/ecrad.html#make_ecrad_version_overview_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.ecrad.make_ecrad_version_overview_csv" title="Permalink to this definition"></a></dt>
+<dd><p>Create a csv file with information on each version of the ecRad simulations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version_list</strong> – list of versions of ecRad simulations e.g. [1, 3, 4, 5.2]</p></li>
+<li><p><strong>outpath</strong> – path where csv file should be saved to</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: a csv file</p>
 </dd></dl>
 
 </div>
