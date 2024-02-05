@@ -78,7 +78,7 @@ input_versions = dict(
 )
 
 # which versions have the 3D parameterizations turned on
-three_d_on = ["v5", "v6", "v23", "v24", "v25", "v26", "v27"]
+three_d_on = ["v5", "v6", "v22", "v23", "v24", "v25", "v26", "v27"]
 
 # which versions have aerosol optics turned on
 aerosol_on = [f"v{x}" for x in [30, 31, 32, 33, 34, 35]]
