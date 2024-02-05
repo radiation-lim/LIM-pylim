@@ -3,7 +3,6 @@
 
 *author*: Johannes Röttenbacher
 """
-from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -162,7 +161,8 @@ def barometric_height_simple(pressure):
 
     return barometric_height
 
-def calculate_open_ocean_albedo_taylor(cos_sza: ArrayLike):
+
+def calculate_open_ocean_albedo_taylor(cos_sza: "ArrayLike"):
     """
     Calculate the open ocean albedo for direct incoming solar irradiance following :cite:t:`taylor1996`.
 
@@ -173,7 +173,7 @@ def calculate_open_ocean_albedo_taylor(cos_sza: ArrayLike):
     with :math:`\\theta` being the solar zenith angle in radians.
 
     Args:
-        coz_sza: cosine of the solar zenith angle
+        cos_sza: cosine of the solar zenith angle
 
     Returns: open ocean albedo
 
