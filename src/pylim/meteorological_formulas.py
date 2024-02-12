@@ -4,9 +4,11 @@
 *author*: Johannes Röttenbacher
 """
 
+import pylim.helpers as h
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import ArrayLike
+from typing import Union
+import xarray as xr
 
 
 def relative_humidity_water_to_relative_humidity_ice(
@@ -181,7 +183,24 @@ def calculate_open_ocean_albedo_taylor(cos_sza: "ArrayLike"):
     return 0.037 / (1.1 * cos_sza ** 1.4 + 0.15)
 
 
-def calculate_extinction_coefficient_solar(iwc: ArrayLike, reff: ArrayLike, density=916.7) -> ArrayLike:
+def calculate_direct_sea_ice_albedo_ebert(cos_sza: Union[float, xr.DataArray]):
+    """
+    Calculate the direct dry snow covered sea ice albedo for a specific solar zenith angle according to :cite:t:`ebert1993`.
+
+    Args:
+        cos_sza: Cosine of the solar zenith angle
+
+    Returns: direct albedo of dry snow covered sea ice
+
+    """
+    factors = xr.DataArray([0.008, 0.008, 0.008, 0.116, 0.222, 0.047], dims="sw_albedo_band")
+    ci_albedo_direct = xr.DataArray(h.ci_albedo_direct, dims="sw_albedo_band")
+    return ci_albedo_direct - factors * cos_sza
+
+
+def calculate_extinction_coefficient_solar(iwc: "ArrayLike",
+                                           reff: "ArrayLike",
+                                           density=916.7) -> "ArrayLike":
     """
     Calculate the extinction coefficient (:math:`\\beta_{ext}`) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in :cite:t:`francis1994`:
 

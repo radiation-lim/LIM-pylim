@@ -55,6 +55,9 @@ ci_albedo[:, 5] = (0.025, 0.025, 0.025, 0.025,
                    0.025, 0.030, 0.036, 0.036,
                    0.025, 0.025, 0.025, 0.025)
 
+# Sea ice direct surface albedo for the six sea ice albedo bands (snow covered; Ebert and Curry, 1993)
+ci_albedo_direct = np.array([0.980, 0.980, 0.980, 0.902, 0.384, 0.053])
+
 # ozone sonde stations
 ozone_files = dict(Flight_20210629a="sc210624.b11",
                    RF16="ny220413.b16", RF17="ny220413.b16", RF18="ny220413.b16")
@@ -67,7 +70,7 @@ plot_units = dict(cloud_fraction="", clwc=r"mg$\,$kg$^{-1}$", ciwc=r"mg$\,$kg$^{
                   crwc=r"mg$\,$kg$^{-1}$", t="K", q=r"g$\,$kg$^{-1}$", re_ice=r"$\mu$m", re_liquid=r"$\mu$m",
                   heating_rate_sw=r"K$\,$day$^{-1}$", heating_rate_lw=r"K$\,$day$^{-1}$",
                   heating_rate_net=r"K$\,$day$^{-1}$",
-                  o3_mmr=r"kg$\,$kg$^{-1}$",
+                  o3_mmr=r"kg$\,$kg$^{-1}$", o3_vmr=r"ppmv",
                   flux_dn_sw=r"W$\,$m$^{-2}$", flux_dn_lw=r"W$\,$m$^{-2}$", flux_up_sw=r"W$\,$m$^{-2}$",
                   flux_up_lw=r"W$\,$m$^{-2}$",
                   cre_sw=r"W$\,$m$^{-2}$", cre_lw=r"W$\,$m$^{-2}$", cre_total=r"W$\,$m$^{-2}$",
@@ -81,6 +84,7 @@ cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water cont
                   cswc="Cloud snow water content", crwc="Cloud rain water content", t="Temperature",
                   q="Specific humidity", q_ice="Ice mass mixing ratio", q_liquid="Liquid mass mixing ratio",
                   iwp="Ice water path", iwc="Ice water content", o3_mmr="Ozone mass mixing ratio",
+                  o3_vmr="Ozone volume mixing ratio",
                   re_ice="Ice effective radius", re_liquid="Liquid effective radius",
                   heating_rate_sw="Solar heating rate", heating_rate_lw="Terrestrial heating rate",
                   heating_rate_net="Net heating rate",
@@ -98,7 +102,7 @@ cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water cont
                   eup="Spectral diffuse upward irradiance", eup_int="Diffuse upward irradiance")
 
 scale_factors = dict(cloud_fraction=1, clwc=1e6, ciwc=1e6, cswc=1e6, crwc=1e6, t=1, q=1000, re_ice=1e6,
-                     re_liquid=1e6, q_ice=1e6, q_liquid=1e6, iwp=1000, iwc=1e6)
+                     re_liquid=1e6, q_ice=1e6, q_liquid=1e6, iwp=1000, iwc=1e6, o3_vmr=1e6)
 
 cmaps = dict(t=cmr.prinsenvlag_r,
              ciwc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85), cswc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85),

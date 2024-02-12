@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pylim.meteorological_formulas &mdash; pylim 1.0.0 documentation</title>
+  <title>pylim.meteorological_formulas &mdash; pylim 1.4.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
@@ -30,7 +30,7 @@
             <a href="../../index.html" class="icon icon-home"> pylim
           </a>
               <div class="version">
-                1.0.0
+                1.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -77,11 +77,11 @@
 
 <span class="sd">*author*: Johannes Röttenbacher</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">pylim.helpers</span> <span class="k">as</span> <span class="nn">h</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 
 <div class="viewcode-block" id="relative_humidity_water_to_relative_humidity_ice"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice">[docs]</a><span class="k">def</span> <span class="nf">relative_humidity_water_to_relative_humidity_ice</span><span class="p">(</span>
@@ -236,7 +236,8 @@
 
     <span class="k">return</span> <span class="n">barometric_height</span></div>
 
-<div class="viewcode-block" id="calculate_open_ocean_albedo_taylor"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_open_ocean_albedo_taylor">[docs]</a><span class="k">def</span> <span class="nf">calculate_open_ocean_albedo_taylor</span><span class="p">(</span><span class="n">cos_sza</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calculate_open_ocean_albedo_taylor"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_open_ocean_albedo_taylor">[docs]</a><span class="k">def</span> <span class="nf">calculate_open_ocean_albedo_taylor</span><span class="p">(</span><span class="n">cos_sza</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the open ocean albedo for direct incoming solar irradiance following :cite:t:`taylor1996`.</span>
 
@@ -247,7 +248,7 @@
 <span class="sd">    with :math:`\\theta` being the solar zenith angle in radians.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        coz_sza: cosine of the solar zenith angle</span>
+<span class="sd">        cos_sza: cosine of the solar zenith angle</span>
 
 <span class="sd">    Returns: open ocean albedo</span>
 
@@ -255,7 +256,23 @@
     <span class="k">return</span> <span class="mf">0.037</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">cos_sza</span> <span class="o">**</span> <span class="mf">1.4</span> <span class="o">+</span> <span class="mf">0.15</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calculate_extinction_coefficient_solar"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_extinction_coefficient_solar">[docs]</a><span class="k">def</span> <span class="nf">calculate_extinction_coefficient_solar</span><span class="p">(</span><span class="n">iwc</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">reff</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">916.7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<div class="viewcode-block" id="calculate_direct_sea_ice_albedo_ebert"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_direct_sea_ice_albedo_ebert">[docs]</a><span class="k">def</span> <span class="nf">calculate_direct_sea_ice_albedo_ebert</span><span class="p">(</span><span class="n">cos_sza</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the direct dry snow covered sea ice albedo for a specific solar zenith angle according to :cite:t:`ebert1993`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cos_sza: Cosine of the solar zenith angle</span>
+
+<span class="sd">    Returns: albedo of dry snow covered sea ice</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.116</span><span class="p">,</span> <span class="mf">0.222</span><span class="p">,</span> <span class="mf">0.047</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">ci_albedo_direct</span> <span class="o">-</span> <span class="n">factors</span> <span class="o">*</span> <span class="n">cos_sza</span></div>
+
+
+<div class="viewcode-block" id="calculate_extinction_coefficient_solar"><a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_extinction_coefficient_solar">[docs]</a><span class="k">def</span> <span class="nf">calculate_extinction_coefficient_solar</span><span class="p">(</span><span class="n">iwc</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span>
+                                           <span class="n">reff</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span>
+                                           <span class="n">density</span><span class="o">=</span><span class="mf">916.7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in :cite:t:`francis1994`:</span>
 
