@@ -308,7 +308,7 @@ def set_xticks_and_xlabels(ax: plt.axis, time_extend: datetime.timedelta) -> plt
     else:
         ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M'))
         ax.xaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 1)))
-        ax.xaxis.set_minor_locator(matplotlib.dates.SecondLocator(interval=10))
+        ax.xaxis.set_minor_locator(matplotlib.dates.SecondLocator(bysecond=range(10, 60, 10)))
 
     return ax
 
@@ -372,7 +372,7 @@ def set_yticks_and_ylabels(ax: plt.axis, time_extend: datetime.timedelta) -> plt
     else:
         ax.yaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M'))
         ax.yaxis.set_major_locator(matplotlib.dates.MinuteLocator(byminute=range(0, 60, 1)))
-        ax.yaxis.set_minor_locator(matplotlib.dates.SecondLocator(interval=10))
+        ax.yaxis.set_minor_locator(matplotlib.dates.SecondLocator(bysecond=range(10, 60, 10)))
 
     return ax
 
