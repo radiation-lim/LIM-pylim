@@ -16,6 +16,8 @@ import datetime
 import logging
 import cmasher as cmr
 from tqdm import tqdm
+import xarray as xr
+import pandas as pd
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +56,19 @@ ci_albedo[:, 4] = (0.250, 0.250, 0.250, 0.250,
 ci_albedo[:, 5] = (0.025, 0.025, 0.025, 0.025,
                    0.025, 0.030, 0.036, 0.036,
                    0.025, 0.025, 0.025, 0.025)
+
+# create a DataArray from the sea ice albedo parameterization
+ci_albedo_da = xr.DataArray(
+    data=ci_albedo,
+    dims=["time", "sw_albedo_band"],
+    name="ci_albedo",
+    coords=dict(
+        sw_albedo_band=np.arange(1, 7),
+        time=pd.date_range("2022-01-15",
+                           periods=12,
+                           freq=pd.offsets.DateOffset(months=1))),
+    attrs=dict(band_bounds=f"{ci_bands}"))
+
 
 # Sea ice direct surface albedo for the six sea ice albedo bands (snow covered; Ebert and Curry, 1993)
 ci_albedo_direct = np.array([0.980, 0.980, 0.980, 0.902, 0.384, 0.053])
