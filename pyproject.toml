@@ -2,7 +2,7 @@
 
 [project]
 name = "pylim"
-version = "1.4.2"
+version = "1.4.3"
 description = "Useful functions, tools and metadata used at the Leipzig Institute for Meteorology"
 readme = "README.md"
 authors = [{ name = "Johannes Röttenbacher", email = "johannes.roettenbacher@uni-leipzig.de" },

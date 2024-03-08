@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pylim.ecrad &mdash; pylim 1.4.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>pylim.ecrad &mdash; pylim 1.4.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=a68a9277"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -27,14 +30,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> pylim
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
           </a>
               <div class="version">
-                1.4.0
+                1.4.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -60,9 +67,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>pylim.ecrad</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.ecrad</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -158,7 +165,9 @@
 <span class="n">aerosol_on</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;v</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">35</span><span class="p">]]</span>
 
 
-<div class="viewcode-block" id="get_version_name"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.get_version_name">[docs]</a><span class="k">def</span> <span class="nf">get_version_name</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_version_name">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.get_version_name">[docs]</a>
+<span class="k">def</span> <span class="nf">get_version_name</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return version name to given version string.</span>
 
 <span class="sd">    Args:</span>
@@ -173,7 +182,10 @@
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Version not found!&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="make_ecrad_version_overview_csv"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.make_ecrad_version_overview_csv">[docs]</a><span class="k">def</span> <span class="nf">make_ecrad_version_overview_csv</span><span class="p">(</span><span class="n">version_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+
+<div class="viewcode-block" id="make_ecrad_version_overview_csv">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.make_ecrad_version_overview_csv">[docs]</a>
+<span class="k">def</span> <span class="nf">make_ecrad_version_overview_csv</span><span class="p">(</span><span class="n">version_list</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                     <span class="n">outpath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./docs/files&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a csv file with information on each version of the ecRad simulations</span>
@@ -234,7 +246,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="ice_effective_radius"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.ice_effective_radius">[docs]</a><span class="k">def</span> <span class="nf">ice_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_ICE</span><span class="p">,</span> <span class="n">PQ_SNOW</span><span class="p">,</span> <span class="n">PLAT</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ice_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.ice_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">ice_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_ICE</span><span class="p">,</span> <span class="n">PQ_SNOW</span><span class="p">,</span> <span class="n">PLAT</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    From ice_effective_radius.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
 
@@ -299,7 +314,10 @@
     <span class="k">return</span> <span class="n">PRE_UM</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
 
 
-<div class="viewcode-block" id="liquid_effective_radius"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.liquid_effective_radius">[docs]</a><span class="k">def</span> <span class="nf">liquid_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_LIQ</span><span class="p">,</span> <span class="n">PQ_RAIN</span><span class="p">):</span>
+
+<div class="viewcode-block" id="liquid_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.liquid_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">liquid_effective_radius</span><span class="p">(</span><span class="n">PPRESSURE</span><span class="p">,</span> <span class="n">PTEMPERATURE</span><span class="p">,</span> <span class="n">PCLOUD_FRAC</span><span class="p">,</span> <span class="n">PQ_LIQ</span><span class="p">,</span> <span class="n">PQ_RAIN</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    From liquid_effective_radius.F90 from the ecRad source code (https://github.com/ecmwf-ifs/ecrad).</span>
 
@@ -381,7 +399,10 @@
     <span class="k">return</span> <span class="n">PRE_UM</span> <span class="o">*</span> <span class="mf">1e-6</span></div>
 
 
-<div class="viewcode-block" id="calc_ice_optics_baran2016"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2016">[docs]</a><span class="k">def</span> <span class="nf">calc_ice_optics_baran2016</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ice_optics_baran2016">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2016">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_baran2016</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute ice-particle scattering properties using a parameterization as a function of ice water mixing ratio</span>
 <span class="sd">    and temperature.</span>
@@ -437,7 +458,10 @@
     <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
 
 
-<div class="viewcode-block" id="calc_ice_optics_baran2017"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2017">[docs]</a><span class="k">def</span> <span class="nf">calc_ice_optics_baran2017</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ice_optics_baran2017">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_baran2017">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_baran2017</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">qi</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute ice-particle scattering properties using a parameterization as a function of ice water mixing ratio</span>
 <span class="sd">    and temperature.</span>
@@ -494,7 +518,10 @@
     <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
 
 
-<div class="viewcode-block" id="calc_ice_optics_fu_sw"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_sw">[docs]</a><span class="k">def</span> <span class="nf">calc_ice_optics_fu_sw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ice_optics_fu_sw">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_sw">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_fu_sw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute shortwave ice-particle scattering properties using Fu (1996) parameterization.</span>
 <span class="sd">    The asymmetry factor in band 14 goes larger than one for r_eff &gt; 100.8 um, so we cap r_eff at 100 um.</span>
@@ -575,7 +602,10 @@
     <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
 
 
-<div class="viewcode-block" id="calc_ice_optics_fu_lw"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_lw">[docs]</a><span class="k">def</span> <span class="nf">calc_ice_optics_fu_lw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ice_optics_fu_lw">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_fu_lw">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_fu_lw</span><span class="p">(</span><span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute longwave ice-particle scattering properties using Fu et al. (1998) parameterization.</span>
 
@@ -652,7 +682,10 @@
     <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
 
 
-<div class="viewcode-block" id="calc_ice_optics_yi"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_yi">[docs]</a><span class="k">def</span> <span class="nf">calc_ice_optics_yi</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ice_optics_yi">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_ice_optics_yi">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ice_optics_yi</span><span class="p">(</span><span class="n">bands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ice_wp</span><span class="p">,</span> <span class="n">r_eff</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute shortwave ice-particle scattering properties using Yi et al. (2013) parameterization.</span>
 
@@ -751,7 +784,10 @@
     <span class="k">return</span> <span class="n">od</span><span class="p">,</span> <span class="n">scat_od</span><span class="p">,</span> <span class="n">g</span></div>
 
 
-<div class="viewcode-block" id="calc_pressure"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_pressure">[docs]</a><span class="k">def</span> <span class="nf">calc_pressure</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+<div class="viewcode-block" id="calc_pressure">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calc_pressure">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_pressure</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the pressure at half and full hybrid model level.</span>
 <span class="sd">    See https://confluence.ecmwf.int/display/CKB/ERA5%3A+compute+pressure+and+geopotential+on+model+levels%2C+geopotential+height+and+geometric+height</span>
@@ -778,7 +814,10 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<div class="viewcode-block" id="calculate_pressure_height"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calculate_pressure_height">[docs]</a><span class="k">def</span> <span class="nf">calculate_pressure_height</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+<div class="viewcode-block" id="calculate_pressure_height">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.calculate_pressure_height">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_pressure_height</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the pressure height for the half and full model levels</span>
 
@@ -849,7 +888,10 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<div class="viewcode-block" id="apply_ice_effective_radius"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_ice_effective_radius">[docs]</a><span class="k">def</span> <span class="nf">apply_ice_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+<div class="viewcode-block" id="apply_ice_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_ice_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_ice_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply ice effective radius function over a whole dataset</span>
 
 <span class="sd">    Args:</span>
@@ -905,7 +947,10 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<div class="viewcode-block" id="apply_liquid_effective_radius"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_liquid_effective_radius">[docs]</a><span class="k">def</span> <span class="nf">apply_liquid_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+
+<div class="viewcode-block" id="apply_liquid_effective_radius">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.apply_liquid_effective_radius">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_liquid_effective_radius</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply liquid effective radius function over a whole dataset</span>
 
 <span class="sd">    Args:</span>
@@ -945,7 +990,10 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<div class="viewcode-block" id="cloud_overlap_decorr_len"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.cloud_overlap_decorr_len">[docs]</a><span class="k">def</span> <span class="nf">cloud_overlap_decorr_len</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+<div class="viewcode-block" id="cloud_overlap_decorr_len">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.cloud_overlap_decorr_len">[docs]</a>
+<span class="k">def</span> <span class="nf">cloud_overlap_decorr_len</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scheme</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the overlap decorrelation length parameter according to Shonk et al. 2010 (https://doi.org/10.1002/qj.647)</span>
 
 <span class="sd">    Args:</span>
@@ -978,7 +1026,10 @@
     <span class="k">return</span> <span class="n">decorr_len_edges_km</span><span class="p">,</span> <span class="n">decorr_len_water_km</span><span class="p">,</span> <span class="n">decorr_len_ratio</span></div>
 
 
-<div class="viewcode-block" id="get_model_level_of_altitude"><a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.get_model_level_of_altitude">[docs]</a><span class="k">def</span> <span class="nf">get_model_level_of_altitude</span><span class="p">(</span>
+
+<div class="viewcode-block" id="get_model_level_of_altitude">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.ecrad.get_model_level_of_altitude">[docs]</a>
+<span class="k">def</span> <span class="nf">get_model_level_of_altitude</span><span class="p">(</span>
     <span class="n">altitude</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">model_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1020,6 +1071,7 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">height_level_da</span></div>
+
 
 </pre></div>
 

@@ -666,6 +666,24 @@ def hellinger_distance(p, q):
     return h
 
 
+def strtobool(value):
+    """
+    Convert a string representation of a boolean value to a Python boolean.
+
+    Args:
+        value (str): String representation of a boolean value.
+
+    Returns:
+        bool: Python boolean value.
+    """
+    if value.lower() in ('true', 't', 'yes', 'y', 'on', '1'):
+        return True
+    elif value.lower() in ('false', 'f', 'no', 'n', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f'Invalid boolean value: {value}')
+
+
 _COLORS = {
     "green": "#3cb371",
     "darkgreen": "#253A24",
