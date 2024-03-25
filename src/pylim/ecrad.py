@@ -107,6 +107,23 @@ def get_version_name(version: str) -> str:
     raise ValueError("Version not found!")
 
 
+def get_input_version(version: str) -> str:
+    """Return input version to given version string.
+
+    Args:
+        version: version string (e.g. v15.1)
+
+    Returns: Name of version
+
+    """
+    for key, values in input_versions.items():
+        if version[:3] in values:
+            match = re.search(r"\.[0-9]", version)
+            result = f'{key}{match[0]}' if match is not None else key
+            return result
+    raise ValueError("Version not found!")
+
+
 def make_ecrad_version_overview_csv(version_list: list = None,
                                     outpath: str = "./docs/files") -> None:
     """
