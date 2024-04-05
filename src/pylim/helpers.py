@@ -94,7 +94,8 @@ plot_units = dict(cloud_fraction="", clwc=r"mg$\,$kg$^{-1}$", ciwc=r"mg$\,$kg$^{
                   od="", scat_od="", od_mean="", scat_od_mean="", g="", g_mean="", od_int="", scat_od_int="", g_int="",
                   absorption="", absorption_int="",
                   eglo=r"W$\,$m$^{-2}\,$nm$^{-1}$", eglo_int=r"W$\,$m$^{-2}$", eup=r"W$\,$m$^{-2}\,$nm$^{-1}$",
-                  eup_int=r"W$\,$m$^{-2}$")
+                  eup_int=r"W$\,$m$^{-2}$",
+                  aerosol_mmr=r"kg$\,$kg$^{-1}$")
 
 cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water content", ciwc="Cloud ice water content",
                   cswc="Cloud snow water content", crwc="Cloud rain water content", t="Temperature",
@@ -115,7 +116,8 @@ cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water cont
                   od_int="Integrated total optical depth", scat_od_int="Integrated scattering optical depth",
                   absorption="Absorption", absorption_int="Integrated absorption",
                   eglo="Spectral global downward irradiance", eglo_int="Global downward irradiance",
-                  eup="Spectral diffuse upward irradiance", eup_int="Diffuse upward irradiance")
+                  eup="Spectral diffuse upward irradiance", eup_int="Diffuse upward irradiance",
+                  aerosol_mmr="Aerosol mass mixing ratio")
 
 scale_factors = dict(cloud_fraction=1, clwc=1e6, ciwc=1e6, cswc=1e6, crwc=1e6, t=1, q=1000, re_ice=1e6,
                      re_liquid=1e6, q_ice=1e6, q_liquid=1e6, iwp=1000, iwc=1e6, o3_vmr=1e6)
