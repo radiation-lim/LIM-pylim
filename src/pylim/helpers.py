@@ -472,7 +472,7 @@ def nested_dict_pairs_iterator(dict_obj: dict):
             yield key, value
 
 
-def setup_logging(dir: str, file: str = '<input>', custom_string: str = None):
+def setup_logging(dir: str, file: str = None, custom_string: str = None):
     """
     Setup up logging to file if script is called from console. If it is executed inside a console setup logging only
     to console.
@@ -488,7 +488,7 @@ def setup_logging(dir: str, file: str = '<input>', custom_string: str = None):
     log = logging.getLogger("pylim")
     # remove existing handlers, necessary when function is called in a loop
     log.handlers = []
-    if file != '<input>':
+    if file is not None:
         file = os.path.basename(file)
         log.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
@@ -506,7 +506,7 @@ def setup_logging(dir: str, file: str = '<input>', custom_string: str = None):
         log.addHandler(ch)
         log.addHandler(fh)
     else:
-        # __file__ is defined as <input> if script is executed in console, set a normal logger instead
+        # __file__ is undefined if script is executed in console, set a normal logger instead
         log.addHandler(logging.StreamHandler())
         log.setLevel(logging.INFO)
 
