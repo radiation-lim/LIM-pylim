@@ -140,10 +140,10 @@ norms = dict(t=colors.TwoSlopeNorm(vmin=200, vcenter=235, vmax=280), clwc=colors
              od_int=colors.LogNorm(vmax=10), scat_od_int=colors.LogNorm())
 
 # plotting dictionaries for BACARDI
-bacardi_labels = dict(F_down_solar=r"$F_{\downarrow, \mathrm{solar}}$",
-                      F_down_terrestrial=r"$F_{\downarrow, \mathrm{terrestrial}}$",
-                      F_up_solar=r"$F_{\uparrow, \mathrm{solar}}$",
-                      F_up_terrestrial=r"$F_{\uparrow, \mathrm{terrestrial}}$",
+bacardi_labels = dict(F_down_solar=r"$F^{\downarrow}_{\mathrm{solar}}$",
+                      F_down_terrestrial=r"$F^{\downarrow}_{\mathrm{terrestrial}}$",
+                      F_up_solar=r"$F^{\uparrow}_{\mathrm{solar}}$",
+                      F_up_terrestrial=r"$F^{\uparrow}_{\mathrm{terrestrial}}$",
                       F_net_solar=r"$F_{\mathrm{net, solar}}$",
                       F_net_terrestrial=r"$F_{\mathrm{net, terrestrial}}$",
                       CRE_solar=r"CRE$_{\mathrm{solar}}$",
