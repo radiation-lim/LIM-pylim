@@ -20,7 +20,7 @@ import pylim.meteorological_formulas as met
 log = logging.getLogger(__name__)
 
 # make list with all ecRad simulation versions
-versions = [x for x in np.arange(4, 39)] + [1, 3.1, 3.2, 13.1, 13.2]
+versions = [x for x in np.arange(4, 43)] + [1, 3.1, 3.2, 13.1, 13.2]
 
 # incomplete list of version names, use name_versions and get_version_name() instead
 version_names = dict(
@@ -50,11 +50,11 @@ version_names = dict(
 
 name_versions = {
     "Fu-IFS": [f"v{x}" for x in [1, 13, 15, 30]],
-    "Fu-IFS VarCloud": [f"v{x}" for x in [16, 17, 33, 36]],
+    "Fu-IFS VarCloud": [f"v{x}" for x in [16, 17, 33, 36, 41]],
     "Fu-IFS 3D": ["v22"],
     "Fu-IFS VarCloud 3D": ["v23", "v26"],
     "Yi2013": ["v19", "v31"],
-    "Yi2013 VarCloud": [f"v{x}" for x in [28, 29, 34, 37]],
+    "Yi2013 VarCloud": [f"v{x}" for x in [28, 29, 34, 37, 42]],
     "Baran2016": ["v18", "v32"],
     "Baran2016 VarCloud": [f"v{x}" for x in [20, 21, 35, 38]],
     "Baran2016 3D": ["v24"],
@@ -65,8 +65,8 @@ name_versions = {
 # which ice optic parameterization is used by which namelist version
 ice_optic_parameterizations = dict(
     fu=[f"v{x}" for x in [1, 3, 5, 8, 10, 11, 12, 13, 14, 15, 16,
-                          17, 22, 23, 26, 30, 33, 36]],
-    yi=[f"v{x}" for x in [4, 19, 28, 29, 31, 34, 37]],
+                          17, 22, 23, 26, 30, 33, 36, 39, 41]],
+    yi=[f"v{x}" for x in [4, 19, 28, 29, 31, 34, 37, 40, 42]],
     baran2016=[f"v{x}" for x in [6, 7, 9, 18, 20, 21,
                                  24, 25, 27, 32, 35, 38]],
     baran2017=["v2"],
@@ -79,8 +79,8 @@ input_versions = dict(
     v3=[f"v{x}" for x in [10]],
     v4=[f"v{x}" for x in [11]],
     v5=[f"v{x}" for x in [13]],
-    v6=[f"v{x}" for x in [15, 18, 19, 22, 24, 30, 31, 32]],
-    v7=[f"v{x}" for x in [16, 20, 26, 27, 28, 33, 34, 35, 36, 37, 38]],
+    v6=[f"v{x}" for x in [15, 18, 19, 22, 24, 30, 31, 32, 39, 40]],
+    v7=[f"v{x}" for x in [16, 20, 26, 27, 28, 33, 34, 35, 36, 37, 38, 41, 42]],
     v8=[f"v{x}" for x in [17, 21, 23, 25, 29]],
     v9=[f"v{x}" for x in [14]],
 )
