@@ -126,7 +126,7 @@ cmaps = dict(t=cmr.prinsenvlag_r,
              ciwc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85), cswc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85),
              crwc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85), q_ice=cmr.get_sub_cmap("cmr.freeze", .25, 0.85),
              iwp=cmr.get_sub_cmap("cmr.freeze", .25, 0.85), iwc=cmr.get_sub_cmap("cmr.freeze", .25, 0.85),
-             cloud_fraction=cmr.neutral,
+             cloud_fraction=cmr.cosmic,
              re_ice=cmr.cosmic_r, re_liquid=cmr.cosmic_r,
              heating_rate_sw=cmr.get_sub_cmap("cmr.ember_r", 0, 0.75), heating_rate_lw=cmr.fusion_r,
              heating_rate_net=cmr.fusion_r,
@@ -574,7 +574,7 @@ def find_bases_tops(mask, rg_list):
         cloud_mask (np.array) : integer array, containing +1 for cloud tops, -1 for cloud bases and 0 for fill_value
     """
     cloud_prop = []
-    cloud_mask = np.full(mask.shape, 0, dtype=np.int)
+    cloud_mask = np.full(mask.shape, 0, dtype=int)
     # bug fix: add an emtpy first range gate to detect cloud bases of clouds which start at the first range gate
     mask = np.hstack((np.full_like(mask, fill_value=True)[:, 0:1], mask))
     for iT in range(mask.shape[0]):
