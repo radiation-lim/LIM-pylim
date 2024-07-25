@@ -88,7 +88,7 @@ plot_units = dict(cloud_fraction="", clwc=r"mg$\,$kg$^{-1}$", ciwc=r"mg$\,$kg$^{
                   heating_rate_net=r"K$\,$day$^{-1}$",
                   o3_mmr=r"kg$\,$kg$^{-1}$", o3_vmr=r"ppmv",
                   flux_dn_sw=r"W$\,$m$^{-2}$", flux_dn_lw=r"W$\,$m$^{-2}$", flux_up_sw=r"W$\,$m$^{-2}$",
-                  flux_up_lw=r"W$\,$m$^{-2}$",
+                  flux_up_lw=r"W$\,$m$^{-2}$", flux_net_sw=r"W$\,$m$^{-2}$", flux_net_lw=r"W$\,$m$^{-2}$",
                   cre_sw=r"W$\,$m$^{-2}$", cre_lw=r"W$\,$m$^{-2}$", cre_total=r"W$\,$m$^{-2}$",
                   transmissivity_sw="", transmissivity_lw="", reflectivity_sw="", reflectivity_lw="",
                   od="", scat_od="", od_mean="", scat_od_mean="", g="", g_mean="", od_int="", scat_od_int="", g_int="",
@@ -109,6 +109,7 @@ cbarlabels = dict(cloud_fraction="Cloud fraction", clwc="Cloud liquid water cont
                   reflectivity_sw="Solar reflectivity", reflectivity_lw="Terrestrial reflectivity",
                   flux_dn_sw="Downward solar irradiance", flux_up_sw="Upward solar irradiance",
                   flux_dn_lw="Downward terrestrial irradiance", flux_up_lw="Upward terrestrial irradiance",
+                  flux_net_lw="Net terrestrial irradiance", flux_net_sw="Net solar irradiance",
                   cre_sw="Solar cloud radiative effect", cre_lw="Terrestrial cloud radiative effect",
                   cre_total="Total cloud radiative effect",
                   od=f"Total optical depth", scat_od=f"Scattering optical depth", od_mean=f"Mean total optical depth",
@@ -137,7 +138,8 @@ norms = dict(t=colors.TwoSlopeNorm(vmin=200, vcenter=235, vmax=280), clwc=colors
              heating_rate_lw=colors.TwoSlopeNorm(vmin=-3, vcenter=0, vmax=1.5),
              heating_rate_net=colors.TwoSlopeNorm(vmin=-2.5, vcenter=0, vmax=2),
              od=colors.LogNorm(vmax=10), od_scat=colors.LogNorm(),
-             od_int=colors.LogNorm(vmax=10), scat_od_int=colors.LogNorm())
+             od_int=colors.LogNorm(vmax=10), scat_od_int=colors.LogNorm(),
+             cre_total=colors.TwoSlopeNorm(vcenter=0))
 
 # plotting dictionaries for BACARDI
 bacardi_labels = dict(F_down_solar=r"$F^{\downarrow}_{\mathrm{solar}}$",

@@ -49,11 +49,11 @@ version_names = dict(
 )
 
 name_versions = {
-    "Fu-IFS": [f"v{x}" for x in [1, 13, 15, 30]],
+    "Fu-IFS": [f"v{x}" for x in [1, 13, 15, 30, 39]],
     "Fu-IFS VarCloud": [f"v{x}" for x in [16, 17, 33, 36, 41]],
     "Fu-IFS 3D": ["v22"],
     "Fu-IFS VarCloud 3D": ["v23", "v26"],
-    "Yi2013": ["v19", "v31"],
+    "Yi2013": ["v19", "v31", "v40"],
     "Yi2013 VarCloud": [f"v{x}" for x in [28, 29, 34, 37, 42]],
     "Baran2016": ["v18", "v32"],
     "Baran2016 VarCloud": [f"v{x}" for x in [20, 21, 35, 38]],
