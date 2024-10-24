@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Documentation &mdash; pylim 1.4.3 documentation</title>
+  <title>API Documentation &mdash; pylim 1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a68a9277"></script>
+        <script src="_static/documentation_options.js?v=9d552775"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="_static/clipboard.min.js?v=a7894cd8"></script>
@@ -41,7 +41,7 @@
             pylim
           </a>
               <div class="version">
-                1.4.3
+                1.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -79,6 +79,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.calc_pressure"><code class="docutils literal notranslate"><span class="pre">calc_pressure()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.calculate_pressure_height"><code class="docutils literal notranslate"><span class="pre">calculate_pressure_height()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.cloud_overlap_decorr_len"><code class="docutils literal notranslate"><span class="pre">cloud_overlap_decorr_len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.get_input_version"><code class="docutils literal notranslate"><span class="pre">get_input_version()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.get_model_level_of_altitude"><code class="docutils literal notranslate"><span class="pre">get_model_level_of_altitude()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.get_version_name"><code class="docutils literal notranslate"><span class="pre">get_version_name()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.ecrad.ice_effective_radius"><code class="docutils literal notranslate"><span class="pre">ice_effective_radius()</span></code></a></li>
@@ -120,6 +121,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-pylim.meteorological_formulas">meteorological_formulas</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.barometric_height"><code class="docutils literal notranslate"><span class="pre">barometric_height()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.barometric_height_simple"><code class="docutils literal notranslate"><span class="pre">barometric_height_simple()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.calculate_absorption_coefficient_terrestrial"><code class="docutils literal notranslate"><span class="pre">calculate_absorption_coefficient_terrestrial()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.calculate_direct_sea_ice_albedo_ebert"><code class="docutils literal notranslate"><span class="pre">calculate_direct_sea_ice_albedo_ebert()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.calculate_extinction_coefficient_solar"><code class="docutils literal notranslate"><span class="pre">calculate_extinction_coefficient_solar()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylim.meteorological_formulas.calculate_open_ocean_albedo_taylor"><code class="docutils literal notranslate"><span class="pre">calculate_open_ocean_albedo_taylor()</span></code></a></li>
@@ -620,6 +622,18 @@ See <a class="reference external" href="https://confluence.ecmwf.int/display/CKB
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylim.ecrad.get_input_version">
+<span class="sig-prename descclassname"><span class="pre">pylim.ecrad.</span></span><span class="sig-name descname"><span class="pre">get_input_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/pylim/ecrad.html#get_input_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.ecrad.get_input_version" title="Link to this definition"></a></dt>
+<dd><p>Return input version to given version string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> – version string (e.g. v15.1)</p>
+</dd>
+</dl>
+<p>Returns: Name of version</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylim.ecrad.get_model_level_of_altitude">
 <span class="sig-prename descclassname"><span class="pre">pylim.ecrad.</span></span><span class="sig-name descname"><span class="pre">get_model_level_of_altitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">altitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataArray</span></span></span><a class="reference internal" href="_modules/pylim/ecrad.html#get_model_level_of_altitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.ecrad.get_model_level_of_altitude" title="Link to this definition"></a></dt>
 <dd><p>Retrieve the model levels corresponding to a time series of altitude values such as given by a flight path.</p>
@@ -1047,7 +1061,7 @@ See: <a class="reference external" href="https://thispointer.com/python-iterate-
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.helpers.setup_logging">
-<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'&lt;input&gt;'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.setup_logging" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pylim.helpers.</span></span><span class="sig-name descname"><span class="pre">setup_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/helpers.html#setup_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.helpers.setup_logging" title="Link to this definition"></a></dt>
 <dd><p>Setup up logging to file if script is called from console. If it is executed inside a console setup logging only
 to console.</p>
 <dl class="field-list simple">
@@ -1199,9 +1213,31 @@ Rerun the failed simulations a couple of times before quitting.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylim.meteorological_formulas.calculate_absorption_coefficient_terrestrial">
+<span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">calculate_absorption_coefficient_terrestrial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iwc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">916.7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ArrayLike</span></span></span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#calculate_absorption_coefficient_terrestrial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.calculate_absorption_coefficient_terrestrial" title="Link to this definition"></a></dt>
+<dd><p>Calculate the absorption coefficient (<span class="math notranslate nohighlight">\(\beta_{abs}\)</span>) of an ice cloud layer in the terrestrial wavelength
+range using the geometric optic assumption (ice particles are large compared to the incoming radiation)
+according to Eq. 7 in <span id="id3">Francis <em>et al.</em> [<a class="reference internal" href="references.html#id176" title="P. N. Francis, A. Jones, R. W. Saunders, K. P. Shine, A. Slingo, and Zhian Sun. An observational and theoretical study of the radiative properties of cirrus: Some results from ICE'89. Quart. J. Roy. Meteorol. Soc., 120(518):809–848, July 1994. doi:10.1002/qj.49712051804.">1994</a>]</span>:</p>
+<div class="math notranslate nohighlight">
+\[\beta_{abs} = \frac{3}{4} \frac{IWC}{\rho_{ice}r_{eff}}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\rho_{ice}\)</span> the density of ice and <span class="math notranslate nohighlight">\(r_{eff}\)</span> the ice effective radius according to <span id="id4">Foot [<a class="reference internal" href="references.html#id165" title="J. S. Foot. Some observations of the optical properties of clouds. II: Cirrus. Quart. J. Roy. Meteorol. Soc., 114(479):145–164, January 1988. doi:10.1002/qj.49711447908.">1988</a>]</span>.</p>
+<p>Integrating this over altitude results in the optical depth of the ice cloud layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iwc</strong> – Ice water content in kg/m^3</p></li>
+<li><p><strong>reff</strong> – Ice effective radius in m</p></li>
+<li><p><strong>density</strong> – Density of ice in kg/m^3</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: Absorption coefficient in m^-1 of the ice cloud layer in the solar wavelength range</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylim.meteorological_formulas.calculate_direct_sea_ice_albedo_ebert">
 <span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">calculate_direct_sea_ice_albedo_ebert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cos_sza</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DataArray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#calculate_direct_sea_ice_albedo_ebert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.calculate_direct_sea_ice_albedo_ebert" title="Link to this definition"></a></dt>
-<dd><p>Calculate the direct dry snow covered sea ice albedo for a specific solar zenith angle according to <span id="id3">Ebert and Curry [<a class="reference internal" href="references.html#id132" title="Elizabeth E. Ebert and Judith A. Curry. An intermediate one-dimensional thermodynamic sea ice model for investigating ice-atmosphere interactions. Journal of Geophysical Research: Oceans, 98(C6):10085–10109, 1993. doi:10.1029/93JC00656.">1993</a>]</span>.</p>
+<dd><p>Calculate the direct dry snow covered sea ice albedo for a specific solar zenith angle according to <span id="id5">Ebert and Curry [<a class="reference internal" href="references.html#id132" title="Elizabeth E. Ebert and Judith A. Curry. An intermediate one-dimensional thermodynamic sea ice model for investigating ice-atmosphere interactions. Journal of Geophysical Research: Oceans, 98(C6):10085–10109, 1993. doi:10.1029/93JC00656.">1993</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cos_sza</strong> – Cosine of the solar zenith angle</p>
@@ -1213,10 +1249,12 @@ Rerun the failed simulations a couple of times before quitting.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.meteorological_formulas.calculate_extinction_coefficient_solar">
 <span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">calculate_extinction_coefficient_solar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iwc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">916.7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ArrayLike</span></span></span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#calculate_extinction_coefficient_solar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.calculate_extinction_coefficient_solar" title="Link to this definition"></a></dt>
-<dd><p>Calculate the extinction coefficient (<span class="math notranslate nohighlight">\(\beta_{ext}\)</span>) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in <span id="id4">Francis <em>et al.</em> [<a class="reference internal" href="references.html#id176" title="P. N. Francis, A. Jones, R. W. Saunders, K. P. Shine, A. Slingo, and Zhian Sun. An observational and theoretical study of the radiative properties of cirrus: Some results from ICE'89. Quart. J. Roy. Meteorol. Soc., 120(518):809–848, July 1994. doi:10.1002/qj.49712051804.">1994</a>]</span>:</p>
+<dd><p>Calculate the extinction coefficient (<span class="math notranslate nohighlight">\(\beta_{ext}\)</span>) of an ice cloud layer in the solar wavelength range
+using the geometric optic assumption (ice particles are large compared to the incoming radiation)
+according to Eq. 10 in <span id="id6">Francis <em>et al.</em> [<a class="reference internal" href="references.html#id176" title="P. N. Francis, A. Jones, R. W. Saunders, K. P. Shine, A. Slingo, and Zhian Sun. An observational and theoretical study of the radiative properties of cirrus: Some results from ICE'89. Quart. J. Roy. Meteorol. Soc., 120(518):809–848, July 1994. doi:10.1002/qj.49712051804.">1994</a>]</span>:</p>
 <div class="math notranslate nohighlight">
 \[\beta_{ext} = \frac{3}{2} \frac{IWC}{\rho_{ice}r_{eff}}\]</div>
-<p>with <span class="math notranslate nohighlight">\(\rho_{ice}\)</span> the density of ice and <span class="math notranslate nohighlight">\(r_{eff}\)</span> the ice effective radius according to <span id="id5">Foot [<a class="reference internal" href="references.html#id165" title="J. S. Foot. Some observations of the optical properties of clouds. II: Cirrus. Quart. J. Roy. Meteorol. Soc., 114(479):145–164, January 1988. doi:10.1002/qj.49711447908.">1988</a>]</span>.</p>
+<p>with <span class="math notranslate nohighlight">\(\rho_{ice}\)</span> the density of ice and <span class="math notranslate nohighlight">\(r_{eff}\)</span> the ice effective radius according to <span id="id7">Foot [<a class="reference internal" href="references.html#id165" title="J. S. Foot. Some observations of the optical properties of clouds. II: Cirrus. Quart. J. Roy. Meteorol. Soc., 114(479):145–164, January 1988. doi:10.1002/qj.49711447908.">1988</a>]</span>.</p>
 <p>Integrating this over altitude results in the optical depth of the ice cloud layer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1233,7 +1271,7 @@ Rerun the failed simulations a couple of times before quitting.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pylim.meteorological_formulas.calculate_open_ocean_albedo_taylor">
 <span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">calculate_open_ocean_albedo_taylor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cos_sza</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#calculate_open_ocean_albedo_taylor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.calculate_open_ocean_albedo_taylor" title="Link to this definition"></a></dt>
-<dd><p>Calculate the open ocean albedo for direct incoming solar irradiance following <span id="id6">Taylor <em>et al.</em> [<a class="reference internal" href="references.html#id646" title="J. P. Taylor, J. M. Edwards, M. D. Glew, P. Hignett, and A. Slingo. Studies with a flexible new radiation code. II: Comparisons with aircraft short-wave observations. Q. J. R. Meteorolog. Soc., 122(532):839–861, April 1996. doi:10.1002/qj.49712253204.">1996</a>]</span>.</p>
+<dd><p>Calculate the open ocean albedo for direct incoming solar irradiance following <span id="id8">Taylor <em>et al.</em> [<a class="reference internal" href="references.html#id646" title="J. P. Taylor, J. M. Edwards, M. D. Glew, P. Hignett, and A. Slingo. Studies with a flexible new radiation code. II: Comparisons with aircraft short-wave observations. Q. J. R. Meteorolog. Soc., 122(532):839–861, April 1996. doi:10.1002/qj.49712253204.">1996</a>]</span>.</p>
 <div class="math notranslate nohighlight">
 \[\alpha = \frac{0.037}{1.1 * \cos(\theta)^{1.4} + 0.15}\]</div>
 <p>with <span class="math notranslate nohighlight">\(\theta\)</span> being the solar zenith angle in radians.</p>
@@ -1249,7 +1287,7 @@ Rerun the failed simulations a couple of times before quitting.</p>
 <dt class="sig sig-object py" id="pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice">
 <span class="sig-prename descclassname"><span class="pre">pylim.meteorological_formulas.</span></span><span class="sig-name descname"><span class="pre">relative_humidity_water_to_relative_humidity_ice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">relative_humidity_water</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'huang'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pylim/meteorological_formulas.html#relative_humidity_water_to_relative_humidity_ice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pylim.meteorological_formulas.relative_humidity_water_to_relative_humidity_ice" title="Link to this definition"></a></dt>
 <dd><p>Convert the relative humidity over water to relative humidity over ice using either the formulas by
-<span id="id7">Huang [<a class="reference internal" href="references.html#id266" title="Jianhua Huang. A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice. J. Appl. Meteorol. Clim., 57(6):1265–1272, June 2018. doi:10.1175/jamc-d-17-0334.1.">2018</a>]</span> or by <span id="id8">Alduchov and Eskridge [<a class="reference internal" href="references.html#id16" title="Oleg A. Alduchov and Robert E. Eskridge. Improved Magnus Form Approximation of Saturation Vapor Pressure. J Appl Meteorol, 35(4):601–609, April 1996. doi:10.1175/1520-0450(1996)035&lt;0601:imfaos&gt;2.0.co;2.">1996</a>]</span>.</p>
+<span id="id9">Huang [<a class="reference internal" href="references.html#id266" title="Jianhua Huang. A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice. J. Appl. Meteorol. Clim., 57(6):1265–1272, June 2018. doi:10.1175/jamc-d-17-0334.1.">2018</a>]</span> or by <span id="id10">Alduchov and Eskridge [<a class="reference internal" href="references.html#id16" title="Oleg A. Alduchov and Robert E. Eskridge. Improved Magnus Form Approximation of Saturation Vapor Pressure. J Appl Meteorol, 35(4):601–609, April 1996. doi:10.1175/1520-0450(1996)035&lt;0601:imfaos&gt;2.0.co;2.">1996</a>]</span>.</p>
 <div class="math notranslate nohighlight">
 \[RH_{ice} = \frac{RH_{water} * e_{s,w}}{e_{s,i}}\]</div>
 <p>with <span class="math notranslate nohighlight">\(e_{s,w}\)</span> the saturation vapor pressure of water and <span class="math notranslate nohighlight">\(e_{s,i}\)</span> the saturation vapor pressure of ice:</p>

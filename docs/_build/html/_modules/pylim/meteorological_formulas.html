@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pylim.meteorological_formulas &mdash; pylim 1.4.3 documentation</title>
+  <title>pylim.meteorological_formulas &mdash; pylim 1.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=a68a9277"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -37,7 +37,7 @@
             pylim
           </a>
               <div class="version">
-                1.4.3
+                1.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -300,7 +300,9 @@
                                            <span class="n">reff</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span>
                                            <span class="n">density</span><span class="o">=</span><span class="mf">916.7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in :cite:t:`francis1994`:</span>
+<span class="sd">    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of an ice cloud layer in the solar wavelength range</span>
+<span class="sd">    using the geometric optic assumption (ice particles are large compared to the incoming radiation)</span>
+<span class="sd">    according to Eq. 10 in :cite:t:`francis1994`:</span>
 
 <span class="sd">    .. math::</span>
 
@@ -321,6 +323,38 @@
 
     <span class="n">b_ext</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">iwc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">density</span> <span class="o">*</span> <span class="n">reff</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">b_ext</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_absorption_coefficient_terrestrial">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.meteorological_formulas.calculate_absorption_coefficient_terrestrial">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_absorption_coefficient_terrestrial</span><span class="p">(</span><span class="n">iwc</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span>
+                                                 <span class="n">reff</span><span class="p">:</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">,</span>
+                                                 <span class="n">density</span><span class="o">=</span><span class="mf">916.7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ArrayLike&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the absorption coefficient (:math:`\\beta_{abs}`) of an ice cloud layer in the terrestrial wavelength</span>
+<span class="sd">    range using the geometric optic assumption (ice particles are large compared to the incoming radiation)</span>
+<span class="sd">    according to Eq. 7 in :cite:t:`francis1994`:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\beta_{abs} = \\frac{3}{4} \\frac{IWC}{\\rho_{ice}r_{eff}}</span>
+
+<span class="sd">    with :math:`\\rho_{ice}` the density of ice and :math:`r_{eff}` the ice effective radius according to :cite:t:`foot1988`.</span>
+
+<span class="sd">    Integrating this over altitude results in the optical depth of the ice cloud layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        iwc: Ice water content in kg/m^3</span>
+<span class="sd">        reff: Ice effective radius in m</span>
+<span class="sd">        density: Density of ice in kg/m^3</span>
+
+<span class="sd">    Returns: Absorption coefficient in m^-1 of the ice cloud layer in the solar wavelength range</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">b_abs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">iwc</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">density</span> <span class="o">*</span> <span class="n">reff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">b_abs</span></div>
 
 
 

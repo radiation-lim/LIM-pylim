@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pylim.libradtran &mdash; pylim 1.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <title>pylim.libradtran &mdash; pylim 1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=9d552775"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -27,14 +30,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> pylim
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pylim
           </a>
               <div class="version">
-                1.0.0
+                1.6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -60,9 +67,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>pylim.libradtran</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pylim.libradtran</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -95,7 +102,9 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_netcdf_global_attributes"><a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_global_attributes">[docs]</a><span class="k">def</span> <span class="nf">get_netcdf_global_attributes</span><span class="p">(</span><span class="n">campaign</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flight</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="get_netcdf_global_attributes">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_global_attributes">[docs]</a>
+<span class="k">def</span> <span class="nf">get_netcdf_global_attributes</span><span class="p">(</span><span class="n">campaign</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flight</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary with globa attributes for a libRadtran simulation</span>
 
@@ -117,7 +126,7 @@
             <span class="n">version_id</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
             <span class="n">comment</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;CIRRUS-HL Campaign, Oberpfaffenhofen, Germany, </span><span class="si">{</span><span class="n">flight</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">contact</span><span class="o">=</span><span class="s2">&quot;PI: m.wendisch@uni-leipzig.de, Data: johannes.roettenbacher@uni-leipzig.de&quot;</span><span class="p">,</span>
-            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span><span class="p">)</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
             <span class="n">institution</span><span class="o">=</span><span class="s2">&quot;Leipzig Institute for Meteorology, Leipzig University, Stephanstr.3, 04103 Leipzig, Germany&quot;</span><span class="p">,</span>
             <span class="n">source</span><span class="o">=</span><span class="s2">&quot;libRadtran 2.0.4&quot;</span><span class="p">,</span>
             <span class="n">references</span><span class="o">=</span><span class="s2">&quot;Emde et al. 2016, 10.5194/gmd-9-1647-2016&quot;</span><span class="p">,</span>
@@ -129,7 +138,7 @@
             <span class="n">platform_id</span><span class="o">=</span><span class="s2">&quot;HALO&quot;</span><span class="p">,</span>
             <span class="n">version_id</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
             <span class="n">institution</span><span class="o">=</span><span class="s2">&quot;Leipzig Institute for Meteorology, Leipzig, Germany, Stephanstr.3, 04103 Leipzig, Germany&quot;</span><span class="p">,</span>
-            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
+            <span class="n">history</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span><span class="p">)</span><span class="si">:</span><span class="s2">%c</span><span class="si">}</span><span class="s2"> UTC&quot;</span><span class="p">,</span>
             <span class="n">contact</span><span class="o">=</span><span class="s2">&quot;Johannes Röttenbacher, johannes.roettenbacher@uni-leipzig.de&quot;</span><span class="p">,</span>
             <span class="n">PI</span><span class="o">=</span><span class="s2">&quot;André Ehrlich, a.ehrlich@uni-leipzig.de&quot;</span><span class="p">,</span>
             <span class="n">source</span><span class="o">=</span><span class="s2">&quot;libRadtran 2.0.4&quot;</span><span class="p">,</span>
@@ -140,7 +149,10 @@
     <span class="k">return</span> <span class="n">global_attributes</span><span class="p">[</span><span class="n">campaign</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="get_netcdf_variable_attributes"><a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_variable_attributes">[docs]</a><span class="k">def</span> <span class="nf">get_netcdf_variable_attributes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="get_netcdf_variable_attributes">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_netcdf_variable_attributes">[docs]</a>
+<span class="k">def</span> <span class="nf">get_netcdf_variable_attributes</span><span class="p">(</span>
     <span class="n">solar_flag</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">integrate_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wavelength_str</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -281,7 +293,10 @@
     <span class="k">return</span> <span class="n">attributes_dict</span></div>
 
 
-<div class="viewcode-block" id="find_closest_radiosonde_station"><a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.find_closest_radiosonde_station">[docs]</a><span class="k">def</span> <span class="nf">find_closest_radiosonde_station</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+
+<div class="viewcode-block" id="find_closest_radiosonde_station">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.find_closest_radiosonde_station">[docs]</a>
+<span class="k">def</span> <span class="nf">find_closest_radiosonde_station</span><span class="p">(</span><span class="n">latitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">longitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given longitude and latitude, find the closest radiosonde station from the campaign dictionary</span>
 
@@ -315,7 +330,10 @@
     <span class="k">return</span> <span class="n">closest_station</span></div>
 
 
-<div class="viewcode-block" id="get_info_from_libradtran_input"><a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_info_from_libradtran_input">[docs]</a><span class="k">def</span> <span class="nf">get_info_from_libradtran_input</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+<div class="viewcode-block" id="get_info_from_libradtran_input">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.get_info_from_libradtran_input">[docs]</a>
+<span class="k">def</span> <span class="nf">get_info_from_libradtran_input</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Open a libRadtran input file and read out some information.</span>
 
@@ -400,7 +418,10 @@
     <span class="k">return</span> <span class="n">output_dict</span></div>
 
 
-<div class="viewcode-block" id="run_uvspec_parallel"><a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.run_uvspec_parallel">[docs]</a><span class="k">def</span> <span class="nf">run_uvspec_parallel</span><span class="p">(</span><span class="n">input_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">uvspec_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="run_uvspec_parallel">
+<a class="viewcode-back" href="../../api_documentation.html#pylim.libradtran.run_uvspec_parallel">[docs]</a>
+<span class="k">def</span> <span class="nf">run_uvspec_parallel</span><span class="p">(</span><span class="n">input_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">uvspec_exe</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run libRadtran simulations for all input files in parallel and check if an output has been created.</span>
 <span class="sd">    Rerun the failed simulations a couple of times before quitting.</span>
@@ -478,6 +499,7 @@
             <span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
+
 </pre></div>
 
            </div>
