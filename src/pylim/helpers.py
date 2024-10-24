@@ -142,14 +142,14 @@ norms = dict(t=colors.TwoSlopeNorm(vmin=200, vcenter=235, vmax=280), clwc=colors
              cre_total=colors.TwoSlopeNorm(vcenter=0))
 
 # plotting dictionaries for BACARDI
-bacardi_labels = dict(F_down_solar=r"$F^{\downarrow}_{\mathrm{solar}}$",
-                      F_down_terrestrial=r"$F^{\downarrow}_{\mathrm{terrestrial}}$",
-                      F_up_solar=r"$F^{\uparrow}_{\mathrm{solar}}$",
-                      F_up_terrestrial=r"$F^{\uparrow}_{\mathrm{terrestrial}}$",
-                      F_net_solar=r"$F_{\mathrm{net, solar}}$",
-                      F_net_terrestrial=r"$F_{\mathrm{net, terrestrial}}$",
-                      CRE_solar=r"CRE$_{\mathrm{solar}}$",
-                      CRE_terrestrial=r"CRE$_{\mathrm{terrestrial}}$",
+bacardi_labels = dict(F_down_solar=r"$F^{\downarrow}_{\mathrm{sol}}$",
+                      F_down_terrestrial=r"$F^{\downarrow}_{\mathrm{ter}}$",
+                      F_up_solar=r"$F^{\uparrow}_{\mathrm{sol}}$",
+                      F_up_terrestrial=r"$F^{\uparrow}_{\mathrm{ter}}$",
+                      F_net_solar=r"$F_{\mathrm{net, sol}}$",
+                      F_net_terrestrial=r"$F_{\mathrm{net, ter}}$",
+                      CRE_solar=r"CRE$_{\mathrm{sol}}$",
+                      CRE_terrestrial=r"CRE$_{\mathrm{ter}}$",
                       CRE_total=r"CRE$_{\mathrm{total}}$")
 
 cb_color_cycles = dict(
@@ -425,9 +425,11 @@ def get_cb_friendly_colors(name: str = "cartocolor") -> list:
     Returns: List with colorblind friendly colors
 
     """
-
-    return cb_color_cycles.get(name, f"No color cycle with name '{name}' found! "
-                                     f"Use one of {cb_color_cycles.keys()}")
+    try:
+        return cb_color_cycles[name]
+    except KeyError:
+        raise KeyError(f"No color cycle with name '{name}' found! "
+                       f"Use one of {cb_color_cycles.keys()}")
 
 
 def nested_dict_values_iterator(dict_obj: dict):
