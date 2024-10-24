@@ -202,7 +202,9 @@ def calculate_extinction_coefficient_solar(iwc: "ArrayLike",
                                            reff: "ArrayLike",
                                            density=916.7) -> "ArrayLike":
     """
-    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of a ice cloud layer in the solar wavelength range using the geometric optic assumption (ice particles are large compared to the incoming radiation) according to Equ. 10 in :cite:t:`francis1994`:
+    Calculate the extinction coefficient (:math:`\\beta_{ext}`) of an ice cloud layer in the solar wavelength range
+    using the geometric optic assumption (ice particles are large compared to the incoming radiation)
+    according to Eq. 10 in :cite:t:`francis1994`:
 
     .. math::
 
@@ -223,6 +225,35 @@ def calculate_extinction_coefficient_solar(iwc: "ArrayLike",
 
     b_ext = (3 * iwc) / (2 * density * reff)
     return b_ext
+
+
+def calculate_absorption_coefficient_terrestrial(iwc: "ArrayLike",
+                                                 reff: "ArrayLike",
+                                                 density=916.7) -> "ArrayLike":
+    """
+    Calculate the absorption coefficient (:math:`\\beta_{abs}`) of an ice cloud layer in the terrestrial wavelength
+    range using the geometric optic assumption (ice particles are large compared to the incoming radiation)
+    according to Eq. 7 in :cite:t:`francis1994`:
+
+    .. math::
+
+        \\beta_{abs} = \\frac{3}{4} \\frac{IWC}{\\rho_{ice}r_{eff}}
+
+    with :math:`\\rho_{ice}` the density of ice and :math:`r_{eff}` the ice effective radius according to :cite:t:`foot1988`.
+
+    Integrating this over altitude results in the optical depth of the ice cloud layer.
+
+    Args:
+        iwc: Ice water content in kg/m^3
+        reff: Ice effective radius in m
+        density: Density of ice in kg/m^3
+
+    Returns: Absorption coefficient in m^-1 of the ice cloud layer in the solar wavelength range
+
+    """
+
+    b_abs = (3 * iwc) / (4 * density * reff)
+    return b_abs
 
 
 if __name__ == "__main__":
